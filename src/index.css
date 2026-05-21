@@ -59,7 +59,7 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.22);
   border: 2px solid var(--bg-primary);
   border-radius: 9999px;
 }
