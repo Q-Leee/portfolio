@@ -1841,22 +1841,12 @@ Try selecting one of these popular questions:
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 
-                // Formspree endpoint can be configured via environment variable VITE_FORMSPREE_URL
-                const endpoint = import.meta.env.VITE_FORMSPREE_URL || '';
-                
-                if (!endpoint) {
-                  setModalContent({
-                    title: 'NEURAL LINK STANDBY',
-                    message: 'The automated email channel is in configuration mode.',
-                    subtext: 'To activate real-time emailing, please set the VITE_FORMSPREE_URL environment variable in your Vercel panel. In the meantime, you can directly email Q at: hyungkyu.lee.q@gmail.com!'
-                  });
-                  setShowModal(true);
-                  return;
-                }
+                const endpoint = 'https://api.web3forms.com/submit';
+                const accessKey = '219152e5-a352-45dc-868d-b27aa33a4891';
 
                 setContactSending(true);
                 addAgentLog('SYSTEM', 'Initiating secure email dispatch protocol...');
-                addAgentLog('SYSTEM', `Target endpoint resolved: '${endpoint}'`);
+                addAgentLog('SYSTEM', 'Target endpoint resolved: Web3Forms Secure Gateway');
 
                 try {
                   const response = await fetch(endpoint, {
@@ -1866,6 +1856,7 @@ Try selecting one of these popular questions:
                       'Accept': 'application/json'
                     },
                     body: JSON.stringify({
+                      access_key: accessKey,
                       name: contactName,
                       email: contactEmail,
                       subject: contactSubject,
@@ -1873,11 +1864,13 @@ Try selecting one of these popular questions:
                     })
                   });
 
-                  if (response.ok) {
+                  const data = await response.json();
+
+                  if (response.ok && data.success) {
                     setModalContent({
                       title: 'TRANSMISSION SECURE',
                       message: 'Your message has been successfully dispatched to Q\'s personal email!',
-                      subtext: 'I have logged this recruitment interaction. Q will personally review the opening details and respond to your return address shortly. Thank you!'
+                      subtext: 'I have logged this recruitment interaction. Q will personally review the details and respond to your return address shortly. Thank you!'
                     });
                     addAgentLog('SYSTEM', `Successfully emailed message from '${contactName}' to Q.`);
                     setContactName('');
@@ -1885,7 +1878,7 @@ Try selecting one of these popular questions:
                     setContactSubject('');
                     setContactMessage('');
                   } else {
-                    throw new Error(`Formspree response not OK (Status: ${response.status})`);
+                    throw new Error(data.message || `Web3Forms response not OK (Status: ${response.status})`);
                   }
                 } catch (error) {
                   const errorMsg = error instanceof Error ? error.message : 'Unknown Error';
