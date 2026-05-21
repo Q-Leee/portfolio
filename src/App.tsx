@@ -555,6 +555,14 @@ Click one of the suggested topics below or type your question directly in the ch
 
   // Agent Telemetry HUD states & refs
   const [hudCollapsed, setHudCollapsed] = useState(false);
+  
+  // Contact Form states
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactSubject, setContactSubject] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSending, setContactSending] = useState(false);
+
   const [agentLogs, setAgentLogs] = useState<AgentLog[]>([
     { id: 1, timestamp: new Date().toLocaleTimeString(), category: 'SYSTEM', text: 'Initializing Q-Agent-Core v2.4...' },
     { id: 2, timestamp: new Date().toLocaleTimeString(), category: 'EMBEDDING', text: 'Pre-loading sparse BM25 candidate dictionaries...' },
@@ -1830,40 +1838,129 @@ Try selecting one of these popular questions:
                 Send me a job offer. I will personally review it and get back to you! 😉
               </p>
               
-              <form onSubmit={(e) => {
+              <form onSubmit={async (e) => {
                 e.preventDefault();
-                setModalContent({
-                  title: 'TRANSMISSION SECURE',
-                  message: 'Your message to Q has been successfully dispatched through the secure neural gateway.',
-                  subtext: 'For immediate, high-priority replies, please feel free to email him directly at hyungkyu.lee.q@gmail.com.'
-                });
-                setShowModal(true);
+                
+                // Formspree endpoint can be configured via environment variable VITE_FORMSPREE_URL
+                const endpoint = import.meta.env.VITE_FORMSPREE_URL || '';
+                
+                if (!endpoint) {
+                  setModalContent({
+                    title: 'NEURAL LINK STANDBY',
+                    message: 'The automated email channel is in configuration mode.',
+                    subtext: 'To activate real-time emailing, please set the VITE_FORMSPREE_URL environment variable in your Vercel panel. In the meantime, you can directly email Q at: hyungkyu.lee.q@gmail.com!'
+                  });
+                  setShowModal(true);
+                  return;
+                }
+
+                setContactSending(true);
+                addAgentLog('SYSTEM', 'Initiating secure email dispatch protocol...');
+
+                try {
+                  const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      name: contactName,
+                      email: contactEmail,
+                      subject: contactSubject,
+                      message: contactMessage
+                    })
+                  });
+
+                  if (response.ok) {
+                    setModalContent({
+                      title: 'TRANSMISSION SECURE',
+                      message: 'Your message has been successfully dispatched to Q\'s personal email!',
+                      subtext: 'I have logged this recruitment interaction. Q will personally review the opening details and respond to your return address shortly. Thank you!'
+                    });
+                    addAgentLog('SYSTEM', `Successfully emailed message from '${contactName}' to Q.`);
+                    setContactName('');
+                    setContactEmail('');
+                    setContactSubject('');
+                    setContactMessage('');
+                  } else {
+                    throw new Error('Formspree response not OK');
+                  }
+                } catch (error) {
+                  setModalContent({
+                    title: 'TRANSMISSION TIMEOUT',
+                    message: 'The neural transmission gateway encountered a connection latency error.',
+                    subtext: 'Could not deliver the message automatically. Please feel free to copy your text and email Q directly at: hyungkyu.lee.q@gmail.com!'
+                  });
+                  addAgentLog('SYSTEM', 'Email gateway transmission failed. Fallback active.');
+                } finally {
+                  setContactSending(false);
+                  setShowModal(true);
+                }
               }} className="contact-form-card" style={{ padding: 0, background: 'none', border: 'none', boxShadow: 'none' }}>
                 
                 <div className="form-group-row">
                   <div className="form-group">
                     <label className="form-label">Your Name & Company</label>
-                    <input type="text" required placeholder="e.g. Hiring Manager at Google" className="form-input" />
+                    <input 
+                      type="text" 
+                      required 
+                      placeholder="e.g. Hiring Manager at Google" 
+                      className="form-input" 
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      disabled={contactSending}
+                    />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Return Email Address</label>
-                    <input type="email" required placeholder="contact@company.com" className="form-input" />
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="contact@company.com" 
+                      className="form-input" 
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      disabled={contactSending}
+                    />
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Subject</label>
-                  <input type="text" required placeholder="e.g. Software Engineer Opportunity" className="form-input" />
+                  <input 
+                    type="text" 
+                    required 
+                    placeholder="e.g. Software Engineer Opportunity" 
+                    className="form-input" 
+                    value={contactSubject}
+                    onChange={(e) => setContactSubject(e.target.value)}
+                    disabled={contactSending}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Message Details</label>
-                  <textarea rows={4} required placeholder="Write details about the opening, relocation, or coffee chat proposal here..." className="form-input" style={{ resize: 'vertical' }}></textarea>
+                  <textarea 
+                    rows={4} 
+                    required 
+                    placeholder="Write details about the opening, relocation, or coffee chat proposal here..." 
+                    className="form-input" 
+                    style={{ resize: 'vertical' }}
+                    value={contactMessage}
+                    onChange={(e) => setContactMessage(e.target.value)}
+                    disabled={contactSending}
+                  ></textarea>
                 </div>
 
-                <button type="submit" className="btn-primary" style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}>
-                  <Send size={16} />
-                  <span>Send Message</span>
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  style={{ alignSelf: 'flex-start', marginTop: '0.5rem', opacity: contactSending ? 0.7 : 1 }}
+                  disabled={contactSending}
+                >
+                  <Send size={16} className={contactSending ? "animate-pulse" : ""} />
+                  <span>{contactSending ? "Sending Securely..." : "Send Message"}</span>
                 </button>
 
               </form>
