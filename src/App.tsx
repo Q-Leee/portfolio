@@ -1856,6 +1856,7 @@ Try selecting one of these popular questions:
 
                 setContactSending(true);
                 addAgentLog('SYSTEM', 'Initiating secure email dispatch protocol...');
+                addAgentLog('SYSTEM', `Target endpoint resolved: '${endpoint}'`);
 
                 try {
                   const response = await fetch(endpoint, {
@@ -1884,15 +1885,16 @@ Try selecting one of these popular questions:
                     setContactSubject('');
                     setContactMessage('');
                   } else {
-                    throw new Error('Formspree response not OK');
+                    throw new Error(`Formspree response not OK (Status: ${response.status})`);
                   }
                 } catch (error) {
+                  const errorMsg = error instanceof Error ? error.message : 'Unknown Error';
                   setModalContent({
                     title: 'TRANSMISSION TIMEOUT',
                     message: 'The neural transmission gateway encountered a connection latency error.',
                     subtext: 'Could not deliver the message automatically. Please feel free to copy your text and email Q directly at: hyungkyu.lee.q@gmail.com!'
                   });
-                  addAgentLog('SYSTEM', 'Email gateway transmission failed. Fallback active.');
+                  addAgentLog('SYSTEM', `Email gateway transmission failed: ${errorMsg}. Fallback active.`);
                 } finally {
                   setContactSending(false);
                   setShowModal(true);
