@@ -227,24 +227,43 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: var(--color-emerald);
+  background: rgba(57, 255, 20, 0.15);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  color: var(--color-cyan);
   padding: 0.35rem 0.8rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4), 0 0 30px rgba(57, 255, 20, 0.15), inset 0 0 6px rgba(57, 255, 20, 0.2);
+  animation: sponsorship-sun-glow 2s infinite alternate ease-in-out;
+  transition: var(--transition-smooth);
+}
+.sponsorship-badge:hover {
+  transform: scale(1.05);
 }
 
 .sponsorship-dot {
   width: 6px;
   height: 6px;
-  background-color: var(--color-emerald);
+  background-color: var(--color-cyan);
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--color-emerald);
-  animation: pulse-glow 1.5s infinite alternate;
+  box-shadow: 0 0 10px var(--color-cyan), 0 0 20px var(--color-cyan);
+  animation: pulse-glow 1s infinite alternate;
+}
+
+@keyframes sponsorship-sun-glow {
+  0% {
+    box-shadow: 0 0 12px rgba(57, 255, 20, 0.4), 0 0 20px rgba(57, 255, 20, 0.15), inset 0 0 4px rgba(57, 255, 20, 0.15);
+    border-color: rgba(57, 255, 20, 0.4);
+    background: rgba(57, 255, 20, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.85), 0 0 45px rgba(57, 255, 20, 0.4), inset 0 0 10px rgba(57, 255, 20, 0.4);
+    border-color: rgba(57, 255, 20, 0.9);
+    background: rgba(57, 255, 20, 0.22);
+  }
 }
 
 /* Hero Section */
