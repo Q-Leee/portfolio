@@ -1142,7 +1142,7 @@ Try selecting one of these popular questions:
         <div className="max-width-container">
           <div className="nav-glass glass">
             <a href="#" className="nav-logo">
-              <Terminal size={22} className="text-cyan-400 animate-pulse" />
+              <img src="/logo.png" alt="Q Logo" className="nav-logo-img" />
               <span>Q.LEE</span>
             </a>
             
