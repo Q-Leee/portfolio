@@ -2294,8 +2294,7 @@ sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its cor
   }`;
     let instantiation = `const myInstance = new ${concept}("Harness Demo");
 myInstance.executeTask();`;
-    let runLogs = `[${concept}] Executing custom request: '${cleanPrompt}'
-Status: Active and verified by Harness Sandbox.`;
+    let runLogs = `[${concept}] Executing custom request: '${cleanPrompt}'\nStatus: Active and verified by Harness Sandbox.`;
 
     if (/\b(calc|math|add|sum|multiply|subtract|calculator|calculation)\b/i.test(lowerPrompt) || /[\+\-\*\/]/.test(lowerPrompt)) {
       const rangeMatch = lowerPrompt.match(/(?:sum|add)\s*(?:of\s*)?(\d+)\s*(?:to|and|-)\s*(\d+)/i);
