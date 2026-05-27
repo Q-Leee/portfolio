@@ -29,6 +29,7 @@ interface Project {
   tech: string[];
   impact?: string;
   highlighted?: boolean;
+  isCurrentJob?: boolean;
 }
 
 interface SkillGroup {
@@ -988,13 +989,14 @@ Try selecting one of these popular questions:
       ],
       tech: ['React', 'TypeScript', 'Vite', 'FastAPI', 'Python', 'Google Sheets API', 'Turso', 'LibSQL', 'Netlify', 'SQL', 'Agile/Scrum'],
       impact: '🔥 Saved countless hours of manual spreadsheet updates and improved daily scheduling reliability for SPC warehouse and production planning.',
-      highlighted: true
+      highlighted: true,
+      isCurrentJob: true
     },
     {
       id: 'workflow',
       title: 'WorkFlow AI',
       subtitle: 'Advanced PDF Q&A & Resume-JD Semantic Matcher',
-      role: 'Personal Project',
+      role: 'AI Engineer (Personal Project)',
       period: '2025 – Present',
       location: 'Remote',
       description: 'A full-stack RAG (Retrieval-Augmented Generation) application designed to facilitate document Q&A, automatic meeting summaries, and semantic candidate-to-posting evaluation.',
@@ -1098,17 +1100,6 @@ Try selecting one of these popular questions:
       type: 'work'
     },
     {
-      period: 'Feb 2026 – Mar 2026',
-      company: 'SPC Group',
-      role: 'Forklift Driver – Warehouse and Logistics',
-      location: 'Shepparton, VIC',
-      bullets: [
-        'Supported high-volume logistics and warehouse operations in a major food manufacturing plant, coordinating pallet transit, staging, and cargo loading.',
-        'Acquired deep operational domain knowledge, directly motivating the creation of custom automation software to eliminate manual paperwork.'
-      ],
-      type: 'work'
-    },
-    {
       period: 'Mar 2025 – Oct 2025',
       company: 'Rubicon Water',
       role: 'Software Tester (Embedded Systems)',
@@ -1142,7 +1133,7 @@ Try selecting one of these popular questions:
       type: 'work'
     },
     {
-      period: 'Mar 2025 – Present',
+      period: 'Mar 2025 – MAR 2026',
       company: 'ACS (Australian Computer Society)',
       role: 'Professional Year Program',
       location: 'Melbourne, VIC',
@@ -1154,12 +1145,23 @@ Try selecting one of these popular questions:
     {
       period: 'Nov 2021 – Oct 2024',
       company: 'Torrens University',
-      role: 'Bachelor of Software Engineering (Artificial Intelligence)',
+      role: 'Bachelor of Software Engineering (AI)',
       location: 'Melbourne, VIC',
       bullets: [
         'Completed comprehensive coursework covering Machine Learning, Computer Vision, Natural Language Processing (NLP), Database Systems, and C Programming.'
       ],
       type: 'education'
+    },
+    {
+      period: '2015 – 2018',
+      company: 'Various Hospitality Venues',
+      role: 'Food and Beverage Attendant / Waiter',
+      location: 'Melbourne, VIC',
+      bullets: [
+        'Provided high-quality customer service, managed table orders, and coordinated with kitchen staff in high-volume, fast-paced restaurant environments.',
+        'Honed vital communication, adaptability, and active listening skills during daily guest interactions.'
+      ],
+      type: 'work'
     },
     {
       period: '2013 – 2015',
@@ -1575,14 +1577,17 @@ Try selecting one of these popular questions:
               return (
                 <div
                   key={proj.id}
-                  className={`project-card glass glass-interactive ${isProjHighlighted ? 'highlighted' : ''}`}
+                  className={`project-card glass glass-interactive ${isProjHighlighted ? 'highlighted' : ''} ${proj.isCurrentJob ? 'current-job' : ''}`}
                 >
                   <div className="project-body">
                     <div className="project-header-row">
                       <div>
                         <h3 className="project-title">{proj.title}</h3>
-                        <div style={{ color: 'var(--color-cyan)', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.2rem' }}>
-                          {proj.role}
+                        <div style={{ color: 'var(--color-cyan)', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span>{proj.role}</span>
+                          {proj.isCurrentJob && (
+                            <span className="current-job-tag">Current Role</span>
+                          )}
                         </div>
                       </div>
                       <span className="project-period">{proj.period}</span>

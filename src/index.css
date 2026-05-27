@@ -818,6 +818,23 @@ button {
   transform: translateY(-5px) scale(1.01);
 }
 
+.project-card.current-job {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.current-job-tag {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--color-emerald);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .project-body {
   padding: 2rem;
   display: flex;
