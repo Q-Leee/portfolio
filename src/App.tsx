@@ -2297,7 +2297,7 @@ myInstance.executeTask();`;
     let runLogs = `[${concept}] Executing custom request: '${cleanPrompt}'
 Status: Active and verified by Harness Sandbox.`;
 
-    if (lowerPrompt.includes('calc') || lowerPrompt.includes('math') || lowerPrompt.includes('add') || lowerPrompt.includes('sum') || lowerPrompt.includes('multiply') || lowerPrompt.includes('subtract')) {
+    if (/\b(calc|math|add|sum|multiply|subtract|calculator|calculation)\b/i.test(lowerPrompt) || /[\+\-\*\/]/.test(lowerPrompt)) {
       const rangeMatch = lowerPrompt.match(/(?:sum|add)\s*(?:of\s*)?(\d+)\s*(?:to|and|-)\s*(\d+)/i);
       if (rangeMatch) {
         const start = parseInt(rangeMatch[1]);
@@ -2371,7 +2371,7 @@ console.log("Calculated 8 * 9 = " + calc.multiply(8, 9));`;
 Calculated 8 * 9 = 72`;
         }
       }
-    } else if (lowerPrompt.includes('user') || lowerPrompt.includes('profile') || lowerPrompt.includes('member') || lowerPrompt.includes('auth')) {
+    } else if (/\b(users?|profiles?|members?|auth|login|signup|signin|credentials)\b/i.test(lowerPrompt)) {
       classProperties = `  private username: string;
   private email: string;
   private role: string;`;
@@ -2392,7 +2392,7 @@ user.promoteToAdmin();
 console.log("Updated state: " + user.getInfo());`;
       runLogs = `Initial state: User: john_doe | Email: john@example.com | Role: user
 Updated state: User: john_doe | Email: john@example.com | Role: admin`;
-    } else if (lowerPrompt.includes('book') || lowerPrompt.includes('library') || lowerPrompt.includes('read') || lowerPrompt.includes('shelf')) {
+    } else if (/\b(books?|library|read|shelf|bookshelf)\b/i.test(lowerPrompt)) {
       classProperties = `  private title: string;
   private author: string;
   private isAvailable: boolean = true;`;
