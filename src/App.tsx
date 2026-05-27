@@ -2297,12 +2297,66 @@ myInstance.executeTask();`;
     let runLogs = `[${concept}] Executing custom request: '${cleanPrompt}'
 Status: Active and verified by Harness Sandbox.`;
 
-    if (lowerPrompt.includes('calc') || lowerPrompt.includes('math') || lowerPrompt.includes('add') || lowerPrompt.includes('sum')) {
-      classProperties = `  private lastCalculated: number = 0;`;
-      classConstructor = `  constructor() {
+    if (lowerPrompt.includes('calc') || lowerPrompt.includes('math') || lowerPrompt.includes('add') || lowerPrompt.includes('sum') || lowerPrompt.includes('multiply') || lowerPrompt.includes('subtract')) {
+      const rangeMatch = lowerPrompt.match(/(?:sum|add)\s*(?:of\s*)?(\d+)\s*(?:to|and|-)\s*(\d+)/i);
+      if (rangeMatch) {
+        const start = parseInt(rangeMatch[1]);
+        const end = parseInt(rangeMatch[2]);
+        let actualSum = 0;
+        for (let i = start; i <= end; i++) actualSum += i;
+
+        classProperties = `  private start: number;
+  private end: number;`;
+        classConstructor = `  constructor(start: number, end: number) {
+    this.start = start;
+    this.end = end;
+  }`;
+        classMethod = `  public calculateSum(): number {
+    let sum = 0;
+    for (let i = this.start; i <= this.end; i++) {
+      sum += i;
+    }
+    return sum;
+  }`;
+        instantiation = `const calc = new ${concept}(${start}, ${end});
+console.log("Sum from ${start} to ${end} = " + calc.calculateSum());`;
+        runLogs = `Sum from ${start} to ${end} = ${actualSum}`;
+      } else {
+        const numberMatches = lowerPrompt.match(/\d+/g);
+        if (numberMatches && numberMatches.length >= 2) {
+          const num1 = parseInt(numberMatches[0]);
+          const num2 = parseInt(numberMatches[1]);
+          let op = "add";
+          let opSymbol = "+";
+          let result = num1 + num2;
+
+          if (lowerPrompt.includes('multiply') || lowerPrompt.includes('*')) {
+            op = "multiply";
+            opSymbol = "*";
+            result = num1 * num2;
+          } else if (lowerPrompt.includes('subtract') || lowerPrompt.includes('minus') || lowerPrompt.includes('-')) {
+            op = "subtract";
+            opSymbol = "-";
+            result = num1 - num2;
+          }
+
+          classProperties = `  private lastValue: number = 0;`;
+          classConstructor = `  constructor() {
+    this.lastValue = 0;
+  }`;
+          classMethod = `  public ${op}(a: number, b: number): number {
+    this.lastValue = a ${opSymbol} b;
+    return this.lastValue;
+  }`;
+          instantiation = `const calc = new ${concept}();
+console.log("Result of ${num1} ${opSymbol} ${num2} = " + calc.${op}(${num1}, ${num2}));`;
+          runLogs = `Result of ${num1} ${opSymbol} ${num2} = ${result}`;
+        } else {
+          classProperties = `  private lastCalculated: number = 0;`;
+          classConstructor = `  constructor() {
     this.lastCalculated = 0;
   }`;
-      classMethod = `  public add(a: number, b: number): number {
+          classMethod = `  public add(a: number, b: number): number {
     this.lastCalculated = a + b;
     return this.lastCalculated;
   }
@@ -2310,11 +2364,13 @@ Status: Active and verified by Harness Sandbox.`;
     this.lastCalculated = a * b;
     return this.lastCalculated;
   }`;
-      instantiation = `const calc = new ${concept}();
+          instantiation = `const calc = new ${concept}();
 console.log("Calculated 15 + 27 = " + calc.add(15, 27));
 console.log("Calculated 8 * 9 = " + calc.multiply(8, 9));`;
-      runLogs = `Calculated 15 + 27 = 42
+          runLogs = `Calculated 15 + 27 = 42
 Calculated 8 * 9 = 72`;
+        }
+      }
     } else if (lowerPrompt.includes('user') || lowerPrompt.includes('profile') || lowerPrompt.includes('member') || lowerPrompt.includes('auth')) {
       classProperties = `  private username: string;
   private email: string;
