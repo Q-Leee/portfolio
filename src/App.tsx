@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Terminal, 
-  Cpu, 
-  Layers, 
-  Send, 
-  Sparkles, 
-  MapPin, 
-  Mail, 
-  Code, 
-  Database, 
+import {
+  Terminal,
+  Cpu,
+  Layers,
+  Send,
+  Sparkles,
+  MapPin,
+  Mail,
+  Code,
+  Database,
   ExternalLink,
   Activity,
   X,
@@ -178,7 +178,7 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
       { id: 'menuscout', label: 'Menu Scout', category: 'project', baseX: -0.25, baseY: -0.4, details: 'Expo/React Native macro-nutrition tracker sync via Supabase.' },
       { id: 'hope', label: 'CyterX HOPE', category: 'project', baseX: 0.38, baseY: 0.35, details: 'React Native SOS real-time biometric mapping UI.' },
       { id: 'rubicon', label: 'Rubicon Water', category: 'project', baseX: -0.42, baseY: 0.15, details: 'Embedded irrigation QA software test matrices.' },
-      
+
       { id: 'python', label: 'Python', category: 'language', baseX: 0.1, baseY: -0.15, details: 'Multi-paradigm language for ML pipelines and FastAPI.' },
       { id: 'typescript', label: 'TypeScript', category: 'language', baseX: -0.1, baseY: 0.25, details: 'Typed JavaScript, standard in React SPA & FastAPI hooks.' },
       { id: 'javascript', label: 'JavaScript', category: 'language', baseX: -0.22, baseY: -0.1, details: 'ES6+ standards, powering asynchronous web logic.' },
@@ -391,17 +391,17 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
         nodesRef.current.forEach(node => {
           if (node.id !== activeFocusId && node.similarity > 0.65) {
             const strength = Math.pow((node.similarity - 0.65) / 0.35, 1.5);
-            
+
             ctx.shadowBlur = 10 * strength;
             ctx.shadowColor = 'rgba(57, 255, 20, 0.6)';
             ctx.strokeStyle = `rgba(57, 255, 20, ${0.12 + 0.35 * strength})`;
             ctx.lineWidth = 0.8 + 1.2 * strength;
-            
+
             ctx.beginPath();
             ctx.moveTo(focusNode.x, focusNode.y);
             ctx.lineTo(node.x, node.y);
             ctx.stroke();
-            
+
             ctx.shadowBlur = 0;
           }
         });
@@ -410,7 +410,7 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
       nodesRef.current.forEach(node => {
         const isFocus = node.id === activeFocusId;
         const isHovered = currentHovered && node.id === currentHovered.id;
-        
+
         let nodeColor = 'var(--color-cyan)';
         if (node.category === 'ai') nodeColor = '#a855f7';
         if (node.category === 'language') nodeColor = '#10b981';
@@ -464,7 +464,7 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
         ctx.moveTo(activeHovered.x, 0);
         ctx.lineTo(activeHovered.x, height);
         ctx.stroke();
-        
+
         ctx.setLineDash([]);
 
         const hudX = Math.min(width - 190, Math.max(10, activeHovered.x - 90));
@@ -473,7 +473,7 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
         ctx.fillStyle = 'rgba(3, 7, 18, 0.9)';
         ctx.strokeStyle = 'var(--color-cyan)';
         ctx.lineWidth = 1;
-        
+
         ctx.beginPath();
         ctx.roundRect(hudX, hudY, 180, 68, 6);
         ctx.fill();
@@ -490,7 +490,7 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
 
         ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.font = '6.5px var(--font-sans)';
-        
+
         const words = activeHovered.details.split(' ');
         let line = '';
         let lineCount = 0;
@@ -562,7 +562,7 @@ Click one of the suggested topics below or type your question directly in the ch
 
   // Agent Telemetry HUD states & refs
   const [hudCollapsed, setHudCollapsed] = useState(false);
-  
+
   // Contact Form states
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -615,7 +615,7 @@ Click one of the suggested topics below or type your question directly in the ch
     const handleScroll = () => {
       const sections = ['about', 'projects', 'skills', 'timeline', 'contact'];
       let currentSection = '';
-      
+
       for (const section of sections) {
         const el = document.getElementById(section);
         if (el) {
@@ -626,7 +626,7 @@ Click one of the suggested topics below or type your question directly in the ch
           }
         }
       }
-      
+
       if (currentSection && currentSection !== lastSection) {
         lastSection = currentSection;
         const capitalized = currentSection.charAt(0).toUpperCase() + currentSection.slice(1);
@@ -657,7 +657,7 @@ Click one of the suggested topics below or type your question directly in the ch
       addAgentLog('SYSTEM', `Filter node activated: '${skill}'.`);
       addAgentLog('EMBEDDING', `Calculating cosine distances for cluster containing "${skill}"...`);
       addAgentLog('LOG', `Highlighting project assets linked to '${skill}'. Match score: 0.99`);
-      
+
       const nodeId = mapSkillToNodeId(skill);
       if (nodeId) {
         setActiveEmbeddingFocus(nodeId);
@@ -685,7 +685,7 @@ Click one of the suggested topics below or type your question directly in the ch
     setIsTyping(true);
     setActiveQuery(userText);
     setRagStep(1); // 1. Tokenizing
-    
+
     // Auto shift active embedding focus if query matches key concepts
     const matchedNode = mapSkillToNodeId(userText);
     if (matchedNode) {
@@ -705,7 +705,7 @@ Click one of the suggested topics below or type your question directly in the ch
       .filter(t => t.length > 0);
     setProcessedTokens(tokens);
     addAgentLog('SYSTEM', `Tokenizing search query parameters: [${tokens.join(', ')}]`);
-    
+
     // Step 2: Embedding Generation (starts at 500ms)
     setTimeout(() => {
       setRagStep(2);
@@ -724,7 +724,7 @@ Click one of the suggested topics below or type your question directly in the ch
       setRagStep(3);
       const query = userText.toLowerCase().trim();
       let mockDocs: RAGDocChunk[] = [];
-      
+
       if (query.includes("spc") || query.includes("roster") || query.includes("assign") || query.includes("schedule") || query.includes("board")) {
         mockDocs = [
           { title: "SPC Job Assignment App Specs", score: 0.942, content: "Developed a live production roster and assignment board using React, FastAPI, and Turso to replace spreadsheet overhead." },
@@ -809,7 +809,7 @@ Q designed and maintains a live production roster & job assignment web applicati
   - Developed a robust Python (FastAPI) proxy service using Google Sheets API as the live data layer to align with existing spreadsheet workflows.
   - Implemented Turso (LibSQL) for persistent logging of roster history, configurations, and user session data.
   - Deployed on Netlify with automated environment-based builds for on-site supervisors.`;
-      } 
+      }
       else if (query.includes("harness") || query.includes("self-healing") || query.includes("healing") || query.includes("agent")) {
         response = `🦾 [Self-Healing AI Agent Harness]
 An autonomous agent harness engineered by Q that executes AI-generated TypeScript code, captures compile/runtime errors in a secure child-process sandbox, and automatically guides the LLM to self-heal its bugs in real time.
@@ -882,39 +882,39 @@ Try selecting one of these popular questions:
       Act as Q-AI, the virtual assistant for HyungKyu (Q) Lee. Synthesize a professional response.
       
       [RETRIEVED_CONTEXT]
-      ${retrievedDocs.map((d, index) => `Doc ${index+1}: [${d.title}] ${d.content}`).join("\n")}
+      ${retrievedDocs.map((d, index) => `Doc ${index + 1}: [${d.title}] ${d.content}`).join("\n")}
       
       [USER_QUESTION]
       "${userText}"
       
       [INFERENCE_EXECUTION]
       Ollama Local / Llama-3-Q-FineTune (8B) temperature=0.2...`;
- 
-       setSynthesisPrompt(promptTemplate);
-       addAgentLog('AGENT', 'Context synthesised. Submitting citation prompt to Ollama Llama-3 model.');
- 
-       // Complete the pipeline and stream into messages
-       setTimeout(() => {
-         setMessages(prev => [
-           ...prev,
-           {
-             id: prev.length + 1,
-             sender: 'ai',
-             text: response,
-             timestamp: new Date()
-           }
-         ]);
-         setIsTyping(false);
-         setRagStep(0);
-         addAgentLog('LOG', `Answer streams complete. Cosine similarity threshold validated.`);
-         
-         // Auto return to chat tab on mobile so user sees the response
-         if (window.innerWidth <= 768) {
-           setActiveTab('chat');
-         }
-       }, 500);
- 
-     }, 2000);
+
+      setSynthesisPrompt(promptTemplate);
+      addAgentLog('AGENT', 'Context synthesised. Submitting citation prompt to Ollama Llama-3 model.');
+
+      // Complete the pipeline and stream into messages
+      setTimeout(() => {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            sender: 'ai',
+            text: response,
+            timestamp: new Date()
+          }
+        ]);
+        setIsTyping(false);
+        setRagStep(0);
+        addAgentLog('LOG', `Answer streams complete. Cosine similarity threshold validated.`);
+
+        // Auto return to chat tab on mobile so user sees the response
+        if (window.innerWidth <= 768) {
+          setActiveTab('chat');
+        }
+      }, 500);
+
+    }, 2000);
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -1014,7 +1014,7 @@ Try selecting one of these popular questions:
       title: 'Menu Scout',
       subtitle: 'Cross-platform Mobile Nutrition & Price Tracker',
       role: 'Personal Project',
-      period: 'Nov 2025 – Present',
+      period: 'Nov 2025 – JAN 2026',
       location: 'Melbourne, VIC',
       description: 'A cross-platform mobile application designed to help health-conscious users compare local menu items by macro-nutrients and price points.',
       bullets: [
@@ -1187,7 +1187,7 @@ Try selecting one of these popular questions:
               <img src="/logo.png" alt="Q Logo" className="nav-logo-img" />
               <span>Q.LEE</span>
             </a>
-            
+
             <nav className="nav-links">
               <a href="#about">About</a>
               <a href="#projects">Projects</a>
@@ -1210,7 +1210,7 @@ Try selecting one of these popular questions:
       <section id="about" className="hero-section">
         <div className="max-width-container max-width-wide">
           <div className="hero-grid">
-            
+
             {/* Left Column: Hero Text */}
             <div className="hero-content">
               <div className="hero-pretitle">Agile Full Stack / AI Engineer</div>
@@ -1244,17 +1244,17 @@ Try selecting one of these popular questions:
 
             {/* Right Column: Q-AI Interactive Chatbot & RAG Dashboard Pane */}
             <div className="ai-dashboard-container glass">
-              
+
               {/* Tab Switcher for Mobile Responsiveness */}
               <div className="dashboard-tabs">
-                <button 
+                <button
                   className={`dashboard-tab ${activeTab === 'chat' ? 'active' : ''}`}
                   onClick={() => setActiveTab('chat')}
                 >
                   <Send size={14} />
                   <span>💬 Chatbot</span>
                 </button>
-                <button 
+                <button
                   className={`dashboard-tab ${activeTab === 'rag' ? 'active' : ''}`}
                   onClick={() => setActiveTab('rag')}
                 >
@@ -1441,8 +1441,8 @@ Try selecting one of these popular questions:
                   <div className="chatbot-scanline"></div>
                   <div ref={messagesContainerRef} className="chatbot-messages">
                     {messages.map(msg => (
-                      <div 
-                        key={msg.id} 
+                      <div
+                        key={msg.id}
                         className={`chat-message ${msg.sender === 'ai' ? 'message-ai' : 'message-user'}`}
                       >
                         {msg.text}
@@ -1463,26 +1463,26 @@ Try selecting one of these popular questions:
 
                   <div className="chat-suggestions-title">💡 Click to Ask Q-AI</div>
                   <div className="chat-suggestions-container">
-                    <button 
-                      onClick={() => handleSuggestionClick('Tell me about the SPC Roster Web App')} 
+                    <button
+                      onClick={() => handleSuggestionClick('Tell me about the SPC Roster Web App')}
                       className="suggestion-chip"
                     >
                       🚀 SPC Roster Web App
                     </button>
-                    <button 
-                      onClick={() => handleSuggestionClick('Explain the WorkFlow AI RAG project')} 
+                    <button
+                      onClick={() => handleSuggestionClick('Explain the WorkFlow AI RAG project')}
                       className="suggestion-chip"
                     >
                       🧠 WorkFlow AI (RAG)
                     </button>
-                    <button 
-                      onClick={() => handleSuggestionClick('What is your visa & sponsorship status in Australia?')} 
+                    <button
+                      onClick={() => handleSuggestionClick('What is your visa & sponsorship status in Australia?')}
                       className="suggestion-chip"
                     >
                       🇦🇺 Visa & Sponsorship
                     </button>
-                    <button 
-                      onClick={() => handleSuggestionClick('Show me Qs contact details')} 
+                    <button
+                      onClick={() => handleSuggestionClick('Show me Qs contact details')}
                       className="suggestion-chip"
                     >
                       📞 How to Contact
@@ -1491,8 +1491,8 @@ Try selecting one of these popular questions:
 
                   <div className="chatbot-footer">
                     <form onSubmit={handleSendMessage} className="chatbot-input-container">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         placeholder="Ask Q-AI a question about Q's resume..."
@@ -1571,10 +1571,10 @@ Try selecting one of these popular questions:
             {projects.map(proj => {
               // Highlight code check
               const isProjHighlighted = selectedSkill ? proj.tech.includes(selectedSkill) : false;
-              
+
               return (
-                <div 
-                  key={proj.id} 
+                <div
+                  key={proj.id}
                   className={`project-card glass glass-interactive ${isProjHighlighted ? 'highlighted' : ''}`}
                 >
                   <div className="project-body">
@@ -1598,8 +1598,8 @@ Try selecting one of these popular questions:
 
                     <div className="project-tags">
                       {proj.tech.map((t, idx) => (
-                        <span 
-                          key={idx} 
+                        <span
+                          key={idx}
                           className={`project-tag ${t === selectedSkill ? 'active' : ''}`}
                         >
                           {t}
@@ -1610,10 +1610,10 @@ Try selecting one of these popular questions:
                     {/* ONLY FOR HARNESS PROJECT: ADD DYNAMIC RUN SIMULATOR BUTTON */}
                     {proj.id === 'harness' && (
                       <div style={{ marginTop: '1.2rem', marginBottom: '0.2rem' }}>
-                        <button 
-                          className="btn-primary" 
-                          style={{ 
-                            padding: '0.5rem 1rem', 
+                        <button
+                          className="btn-primary"
+                          style={{
+                            padding: '0.5rem 1rem',
                             fontSize: '0.8rem',
                             display: 'flex',
                             alignItems: 'center',
@@ -1693,8 +1693,8 @@ Try selecting one of these popular questions:
           <div className="embedding-container glass">
             {/* Visualizer Canvas Block */}
             <div className="canvas-wrapper">
-              <EmbeddingSpaceVisualizer 
-                activeFocusId={activeEmbeddingFocus} 
+              <EmbeddingSpaceVisualizer
+                activeFocusId={activeEmbeddingFocus}
                 onNodeClick={(id) => {
                   setActiveEmbeddingFocus(id);
                   addAgentLog('SYSTEM', `Focal node shifted to embedding cell: '${id}'`);
@@ -1748,7 +1748,7 @@ Try selecting one of these popular questions:
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => {
                       setActiveEmbeddingFocus(null);
                       addAgentLog('SYSTEM', 'Cleared Latent Space vectors filter.');
@@ -1783,7 +1783,7 @@ Try selecting one of these popular questions:
             {timeline.map((item, idx) => (
               <div key={idx} className="timeline-card glass glass-interactive">
                 <div className="timeline-dot"></div>
-                
+
                 <div className="timeline-header">
                   <div className="timeline-title-row">
                     <span className="timeline-role">{item.role}</span>
@@ -1817,11 +1817,11 @@ Try selecting one of these popular questions:
           </div>
 
           <div className="contact-grid">
-            
+
             {/* Info Cards */}
             <div className="contact-info-card glass">
               <h3 style={{ fontSize: '1.25rem' }}>Personal Contact Information</h3>
-              
+
               <div className="contact-meta-list">
                 {/* Email (with copying interaction) */}
                 <div className="contact-meta-item">
@@ -1830,7 +1830,7 @@ Try selecting one of these popular questions:
                   </div>
                   <div className="contact-meta-content">
                     <span className="contact-meta-label">Email Address</span>
-                    <button 
+                    <button
                       onClick={handleCopyEmail}
                       className="contact-meta-value"
                       style={{ textAlign: 'left', textDecoration: 'underline' }}
@@ -1858,9 +1858,9 @@ Try selecting one of these popular questions:
                   </div>
                   <div className="contact-meta-content">
                     <span className="contact-meta-label">LinkedIn</span>
-                    <a 
-                      href="https://linkedin.com/in/qleeq" 
-                      target="_blank" 
+                    <a
+                      href="https://linkedin.com/in/qleeq"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="contact-meta-value"
                       style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}
@@ -1878,9 +1878,9 @@ Try selecting one of these popular questions:
                   </div>
                   <div className="contact-meta-content">
                     <span className="contact-meta-label">GitHub Repository</span>
-                    <a 
-                      href="https://github.com/Q-Leee" 
-                      target="_blank" 
+                    <a
+                      href="https://github.com/Q-Leee"
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="contact-meta-value"
                       style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}
@@ -1899,10 +1899,10 @@ Try selecting one of these popular questions:
               <p style={{ color: 'var(--color-cyan)', fontWeight: '700', fontSize: '0.92rem', marginTop: '0.25rem', marginBottom: '0.75rem', textShadow: '0 0 10px rgba(57, 255, 20, 0.4)' }}>
                 Send me a job offer. I will personally review it and get back to you! 😉
               </p>
-              
+
               <form onSubmit={async (e) => {
                 e.preventDefault();
-                
+
                 const endpoint = 'https://api.web3forms.com/submit';
                 const accessKey = '219152e5-a352-45dc-868d-b27aa33a4891';
 
@@ -1955,15 +1955,15 @@ Try selecting one of these popular questions:
                   setShowModal(true);
                 }
               }} className="contact-form-card" style={{ padding: 0, background: 'none', border: 'none', boxShadow: 'none' }}>
-                
+
                 <div className="form-group-row">
                   <div className="form-group">
                     <label className="form-label">Your Name & Company</label>
-                    <input 
-                      type="text" 
-                      required 
-                      placeholder="e.g. Hiring Manager at Google" 
-                      className="form-input" 
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Hiring Manager at Google"
+                      className="form-input"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
                       disabled={contactSending}
@@ -1971,11 +1971,11 @@ Try selecting one of these popular questions:
                   </div>
                   <div className="form-group">
                     <label className="form-label">Return Email Address</label>
-                    <input 
-                      type="email" 
-                      required 
-                      placeholder="contact@company.com" 
-                      className="form-input" 
+                    <input
+                      type="email"
+                      required
+                      placeholder="contact@company.com"
+                      className="form-input"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
                       disabled={contactSending}
@@ -1985,11 +1985,11 @@ Try selecting one of these popular questions:
 
                 <div className="form-group">
                   <label className="form-label">Subject</label>
-                  <input 
-                    type="text" 
-                    required 
-                    placeholder="e.g. Software Engineer Opportunity" 
-                    className="form-input" 
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Software Engineer Opportunity"
+                    className="form-input"
                     value={contactSubject}
                     onChange={(e) => setContactSubject(e.target.value)}
                     disabled={contactSending}
@@ -1998,11 +1998,11 @@ Try selecting one of these popular questions:
 
                 <div className="form-group">
                   <label className="form-label">Message Details</label>
-                  <textarea 
-                    rows={4} 
-                    required 
-                    placeholder="Write details about the opening, relocation, or coffee chat proposal here..." 
-                    className="form-input" 
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Write details about the opening, relocation, or coffee chat proposal here..."
+                    className="form-input"
                     style={{ resize: 'vertical' }}
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
@@ -2010,9 +2010,9 @@ Try selecting one of these popular questions:
                   ></textarea>
                 </div>
 
-                <button 
-                  type="submit" 
-                  className="btn-primary" 
+                <button
+                  type="submit"
+                  className="btn-primary"
                   style={{ alignSelf: 'flex-start', marginTop: '0.5rem', opacity: contactSending ? 0.7 : 1 }}
                   disabled={contactSending}
                 >
@@ -2042,21 +2042,21 @@ Try selecting one of these popular questions:
           <div className="custom-modal-card glass" onClick={(e) => e.stopPropagation()}>
             <div className="custom-modal-scanline"></div>
             <div className="custom-modal-glow"></div>
-            
+
             <div className="custom-modal-header">
               <Sparkles size={22} style={{ color: 'var(--color-cyan)' }} className="animate-pulse" />
               <h3 className="custom-modal-title">{modalContent.title}</h3>
             </div>
-            
+
             <div className="custom-modal-body">
               <p className="custom-modal-message">{modalContent.message}</p>
               {modalContent.subtext && (
                 <p className="custom-modal-subtext">{modalContent.subtext}</p>
               )}
             </div>
-            
+
             <div className="custom-modal-footer">
-              <button 
+              <button
                 onClick={() => setShowModal(false)}
                 className="btn-primary custom-modal-btn"
               >
@@ -2067,14 +2067,14 @@ Try selecting one of these popular questions:
         </div>
       )}
       {/* Harness Agent Simulator Modal */}
-      <HarnessSimulatorModal 
-        isOpen={harnessModalOpen} 
-        onClose={() => setHarnessModalOpen(false)} 
+      <HarnessSimulatorModal
+        isOpen={harnessModalOpen}
+        onClose={() => setHarnessModalOpen(false)}
       />
       {/* Collapsible Cyber Agent Telemetry HUD */}
       <div className={`agent-hud-container ${hudCollapsed ? 'collapsed' : ''}`}>
         {hudCollapsed ? (
-          <button 
+          <button
             onClick={() => setHudCollapsed(false)}
             className="agent-hud-collapsed-trigger glass glass-interactive"
           >
@@ -2088,14 +2088,14 @@ Try selecting one of these popular questions:
                 <span className="agent-hud-dot"></span>
                 <span className="agent-hud-title">Q-AGENT TELEMETRY HUD</span>
               </div>
-              <button 
+              <button
                 onClick={() => setHudCollapsed(true)}
                 className="agent-hud-minimize"
               >
                 —
               </button>
             </div>
-            
+
             <div ref={logsContainerRef} className="agent-hud-console">
               {agentLogs.map(log => (
                 <div key={log.id} className="hud-log-line">
@@ -2266,7 +2266,7 @@ sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its cor
   const generateDynamicTask = (promptText: string) => {
     const cleanPrompt = promptText.replace(/[^a-zA-Z0-9\s]/g, '').trim();
     const words = cleanPrompt.split(/\s+/).filter(w => w.length > 0);
-    
+
     // Core concept extractor
     let concept = "CustomUtility";
     if (words.length > 0) {
@@ -2277,7 +2277,7 @@ sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its cor
         concept = words.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
       }
     }
-    
+
     if (concept.length > 25) concept = concept.substring(0, 25);
     concept = concept.replace(/[^a-zA-Z0-9]/g, '');
     if (!/^[A-Z]/.test(concept)) concept = 'My' + concept;
@@ -2488,13 +2488,13 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
     (async () => {
       await log(`🤖 [1/3] Asking local AI model to write initial TypeScript code for '${data.title}'...`, 600);
       setProgress(20);
-      
+
       await log(`✔ Initial code generated successfully!\n\n--- Generated Code ---\n${data.initial}\n----------------------`, 1000);
       setProgress(40);
 
       await log(`🚀 [Attempt 1/4] Executing code in the Harness Sandbox...`, 800);
       await log(`⚠️ [TEST SCENARIO] Injected a broken import line into Attempt 1 to demonstrate Self-Healing functionality!\n`, 600);
-      
+
       await log(`💥 [FAIL] Execution failed!\n--- Captured Error Logs ---\n${data.error}\n--------------------------`, 800);
       setProgress(60);
 
@@ -2503,10 +2503,10 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
       setProgress(80);
 
       await log(`🚀 [Attempt 2/4] Executing healed code in the Harness Sandbox...`, 800);
-      
+
       await log(`🎉 [SUCCESS] The code compiled and ran without any errors!\n------------------ RUN OUTPUT ------------------\n${data.output}\n------------------------------------------------`, 800);
       await log(`🏁 [CONCLUSION] Mission accomplished! The Harness successfully routed the errors, prompted the LLM, and validated bug-free code.`, 600);
-      
+
       setProgress(100);
       setStatus('success');
       setIsRunning(false);
@@ -2523,41 +2523,41 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
   const activeData = selectedTask === 'custom' ? customTaskData : tasksData[selectedTask];
 
   return (
-    <div 
-      className="custom-modal-overlay" 
-      style={{ 
-        zIndex: 1000, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        backgroundColor: 'rgba(3, 7, 18, 0.95)', 
+    <div
+      className="custom-modal-overlay"
+      style={{
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(3, 7, 18, 0.95)',
         backdropFilter: 'blur(10px)',
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0
-      }} 
+      }}
       onClick={onClose}
     >
-      <div 
-        className="custom-modal-card glass" 
-        style={{ 
-          width: '92%', 
-          maxWidth: '960px', 
-          padding: '2.2rem', 
-          maxHeight: '92vh', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          border: '1px solid rgba(6, 182, 212, 0.4)', 
+      <div
+        className="custom-modal-card glass"
+        style={{
+          width: '92%',
+          maxWidth: '960px',
+          padding: '2.2rem',
+          maxHeight: '92vh',
+          display: 'flex',
+          flexDirection: 'column',
+          border: '1px solid rgba(6, 182, 212, 0.4)',
           boxShadow: '0 0 35px rgba(6, 182, 212, 0.2)',
           position: 'relative'
-        }} 
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="custom-modal-scanline"></div>
         <div className="custom-modal-glow"></div>
-        
+
         {/* Terminal Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(6, 182, 212, 0.2)', paddingBottom: '0.8rem', marginBottom: '1.2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -2588,17 +2588,17 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
               </span>
             </span>
           </div>
-          <button 
-            onClick={onClose} 
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--text-secondary)', 
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
-            }} 
+            }}
             className="hover-text-white"
           >
             <X size={18} />
@@ -2630,7 +2630,7 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
                 {tasksData[key].title}
               </button>
             ))}
-            
+
             {customTaskData && (
               <button
                 disabled={isRunning}
@@ -2694,7 +2694,7 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
         </div>
 
         {/* Terminal Screen */}
-        <div 
+        <div
           style={{
             flex: 1,
             backgroundColor: 'rgba(3, 7, 18, 0.95)',
@@ -2720,26 +2720,26 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
           )}
 
           {terminalLogs.map((logLine, idx) => {
-            let textColor = '#34d399'; 
+            let textColor = '#34d399';
             if (logLine.includes('💥') || logLine.includes('FAIL') || logLine.includes('Error')) {
-              textColor = '#f87171'; 
+              textColor = '#f87171';
             } else if (logLine.includes('⚠️') || logLine.includes('TEST')) {
-              textColor = '#fbbf24'; 
+              textColor = '#fbbf24';
             } else if (logLine.includes('🎉') || logLine.includes('SUCCESS')) {
-              textColor = '#38bdf8'; 
+              textColor = '#38bdf8';
             } else if (logLine.includes('🤖') || logLine.includes('🔄')) {
-              textColor = '#c084fc'; 
+              textColor = '#c084fc';
             } else if (logLine.includes('const ') || logLine.includes('function ') || logLine.includes('console.log') || logLine.includes('// ') || logLine.includes('class ')) {
-              textColor = '#cbd5e1'; 
+              textColor = '#cbd5e1';
             }
 
             return (
-              <pre 
-                key={idx} 
-                style={{ 
-                  whiteSpace: 'pre-wrap', 
-                  color: textColor, 
-                  lineHeight: '1.6', 
+              <pre
+                key={idx}
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  color: textColor,
+                  lineHeight: '1.6',
                   marginBottom: '0.8rem',
                   borderLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') ? '2px solid rgba(6, 182, 212, 0.2)' : 'none',
                   paddingLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') ? '0.6rem' : '0'
@@ -2759,7 +2759,7 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
               <div style={{ backgroundColor: 'var(--color-cyan)', width: `${progress}%`, height: '100%', transition: 'width 0.4s ease-out' }}></div>
             </div>
           )}
-          
+
           <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end' }}>
             <button
               onClick={resetSimulation}
