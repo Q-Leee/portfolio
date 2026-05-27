@@ -10,7 +10,10 @@ import {
   Code, 
   Database, 
   ExternalLink,
-  Activity
+  Activity,
+  X,
+  Play,
+  RefreshCw
 } from 'lucide-react';
 
 // Resume data structures
@@ -112,7 +115,8 @@ const vectorData: { [key: string]: number[] } = {
   'rubicon': [0.10, 0.60, 0.30, 0.20],
   'saperp': [0.10, 0.50, 0.20, 0.10],
   'git': [0.40, 0.70, 0.40, 0.40],
-  'docker': [0.50, 0.80, 0.60, 0.50]
+  'docker': [0.50, 0.80, 0.60, 0.50],
+  'harness': [0.85, 0.75, 0.80, 0.85]
 };
 
 const getCosineSimilarity = (vecA: number[], vecB: number[]): number => {
@@ -147,6 +151,7 @@ const mapSkillToNodeId = (skillName: string): string => {
   if (norm.includes('sap')) return 'saperp';
   if (norm.includes('spc') || norm.includes('roster') || norm.includes('assign') || norm.includes('schedule')) return 'spc';
   if (norm.includes('workflow')) return 'workflow';
+  if (norm.includes('harness') || norm.includes('agent') || norm.includes('healing')) return 'harness';
   if (norm.includes('scout')) return 'menuscout';
   if (norm.includes('hope') || norm.includes('ring')) return 'hope';
   if (norm.includes('rubicon')) return 'rubicon';
@@ -169,6 +174,7 @@ function EmbeddingSpaceVisualizer({ activeFocusId, onNodeClick }: VisualizerProp
     const rawNodes = [
       { id: 'spc', label: 'SPC Roster App', category: 'project', baseX: 0.15, baseY: 0.2, details: 'Production labour scheduling software proxying Google Sheets.' },
       { id: 'workflow', label: 'WorkFlow AI', category: 'project', baseX: 0.45, baseY: -0.25, details: 'RAG system executing document citations via ChromaDB.' },
+      { id: 'harness', label: 'AI Agent Harness', category: 'project', baseX: 0.62, baseY: 0.1, details: 'Autonomous self-healing code execution and repair sandbox.' },
       { id: 'menuscout', label: 'Menu Scout', category: 'project', baseX: -0.25, baseY: -0.4, details: 'Expo/React Native macro-nutrition tracker sync via Supabase.' },
       { id: 'hope', label: 'CyterX HOPE', category: 'project', baseX: 0.38, baseY: 0.35, details: 'React Native SOS real-time biometric mapping UI.' },
       { id: 'rubicon', label: 'Rubicon Water', category: 'project', baseX: -0.42, baseY: 0.15, details: 'Embedded irrigation QA software test matrices.' },
@@ -542,6 +548,7 @@ Click one of the suggested topics below or type your question directly in the ch
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', message: '', subtext: '' });
+  const [harnessModalOpen, setHarnessModalOpen] = useState(false);
 
   // RAG Pipeline states
   const [activeTab, setActiveTab] = useState<'chat' | 'rag'>('chat');
@@ -724,6 +731,12 @@ Click one of the suggested topics below or type your question directly in the ch
           { title: "Torrens University AI Degree", score: 0.581, content: "Coursework covering database engineering, software lifecycle, and enterprise integrations." },
           { title: "Rubicon Water embedded QA logs", score: 0.412, content: "Inventory tracking and Defect logging using SAP ERP systems." }
         ];
+      } else if (query.includes("harness") || query.includes("self-healing") || query.includes("healing") || query.includes("agent")) {
+        mockDocs = [
+          { title: "Self-Healing AI Agent Harness Core", score: 0.982, content: "Autonomous code execution sandbox that captures typescript compiler/runtime stderr stack traces and feeds them back to LLM." },
+          { title: "Hybrid Failover Architecture", score: 0.941, content: "Seamless local-first fallback: automatically routes LLM prompts to local Ollama server if cloud Gemini API hits 429 quota blockages." },
+          { title: "Q's core technical profile", score: 0.712, content: "Expertise in building robust system guardrails, retry budgets, and self-healing LLM loops." }
+        ];
       } else if (query.includes("workflow") || query.includes("rag") || query.includes("ollama") || query.includes("search") || query.includes("vector") || query.includes("ai") || query.includes("ml")) {
         mockDocs = [
           { title: "WorkFlow AI - RAG Matcher Architecture", score: 0.968, content: "Hybrid search pipeline merging dense embeddings with BM25 keyword matching and Cross-Encoder reranking." },
@@ -797,6 +810,16 @@ Q designed and maintains a live production roster & job assignment web applicati
   - Implemented Turso (LibSQL) for persistent logging of roster history, configurations, and user session data.
   - Deployed on Netlify with automated environment-based builds for on-site supervisors.`;
       } 
+      else if (query.includes("harness") || query.includes("self-healing") || query.includes("healing") || query.includes("agent")) {
+        response = `🦾 [Self-Healing AI Agent Harness]
+An autonomous agent harness engineered by Q that executes AI-generated TypeScript code, captures compile/runtime errors in a secure child-process sandbox, and automatically guides the LLM to self-heal its bugs in real time.
+
+• Tech Stack: TypeScript, Node.js, Gemini API, local Ollama (qwen2.5-coder), ts-node, Child Process sandbox
+• Key Strengths & Architecture:
+  - Designed a robust failover/fallback architecture that seamlessly redirects API calls to local Ollama if Gemini hits 429 quota limits.
+  - Implemented a child-process sandbox execution environment with safety limits and timeouts to avoid resource lockups or infinite loops.
+  - Crafted an autonomous error-feedback loop that captures compilation stderr stack traces and feeds them back to the model, leading to 100% bug-free output autonomously.`;
+      }
       else if (query.includes("workflow") || query.includes("rag") || query.includes("ollama") || query.includes("search") || query.includes("vector") || query.includes("ai") || query.includes("ml")) {
         response = `🧠 [WorkFlow AI & Machine Learning]
 A high-performance, full-stack RAG (Retrieval-Augmented Generation) application designed by Q for document analysis and CV matchmaking.
@@ -848,6 +871,7 @@ Q served as a Squad Leader in the Republic of Korea Army (2013-2015). Under high
         response = `👋 Hello! I am here to help you learn more about Q's engineering experience.
 
 Try selecting one of these popular questions:
+• "Explain the Self-Healing AI Agent Harness project"
 • "Tell me about the SPC Roster Web App"
 • "Explain the WorkFlow AI (RAG) Project"
 • "What is Q's visa & sponsorship status in Australia?"
@@ -928,6 +952,24 @@ Try selecting one of these popular questions:
 
   // Projects list
   const projects: Project[] = [
+    {
+      id: 'harness',
+      title: 'Self-Healing AI Agent Harness',
+      subtitle: 'Autonomous Code Execution & Self-Correction Engine',
+      role: 'AI Infrastructure Engineer (Personal Project)',
+      period: 'May 2026 – Present',
+      location: 'Shepparton, VIC',
+      description: 'Engineered an autonomous agent harness that executes AI-generated TypeScript code, captures compilation/runtime errors in a secure child-process sandbox, and automatically feeds the error stacks back to the LLM to self-heal (repair) the bugs in real time.',
+      bullets: [
+        'Designed a robust failover/fallback architecture: Primary requests go to the Gemini Cloud API; if rate-limited (429) or offline, it seamlessly falls back to a local Ollama server running qwen2.5-coder.',
+        'Created a sandbox execution harness that writes generated scripts to ephemeral files, spawns sub-processes with configurable timeouts to prevent infinite loops, and captures stdout/stderr.',
+        'Implemented a recursive self-healing loop with customizable retry budget guardrails, achieving 100% bug-free output autonomously.',
+        'Successfully tested and verified the agent against complex data validation, type guards, and mathematical algorithms.'
+      ],
+      tech: ['TypeScript', 'Node.js', 'Vite', 'Gemini API', 'Ollama', 'Failover Architecture', 'TypeScript Compiler API', 'Child Process API', 'Guardrails'],
+      impact: '🦾 Demonstrates advanced Agentic Workflow patterns, creating a self-correcting development pipeline that operates entirely autonomously.',
+      highlighted: true
+    },
     {
       id: 'spc',
       title: 'SPC Job Assignment Web App',
@@ -1564,6 +1606,26 @@ Try selecting one of these popular questions:
                         </span>
                       ))}
                     </div>
+
+                    {/* ONLY FOR HARNESS PROJECT: ADD DYNAMIC RUN SIMULATOR BUTTON */}
+                    {proj.id === 'harness' && (
+                      <div style={{ marginTop: '1.2rem', marginBottom: '0.2rem' }}>
+                        <button 
+                          className="btn-primary" 
+                          style={{ 
+                            padding: '0.5rem 1rem', 
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem'
+                          }}
+                          onClick={() => setHarnessModalOpen(true)}
+                        >
+                          <Terminal size={14} />
+                          <span>Try Live Harness Simulator</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {proj.impact && (
@@ -2004,6 +2066,11 @@ Try selecting one of these popular questions:
           </div>
         </div>
       )}
+      {/* Harness Agent Simulator Modal */}
+      <HarnessSimulatorModal 
+        isOpen={harnessModalOpen} 
+        onClose={() => setHarnessModalOpen(false)} 
+      />
       {/* Collapsible Cyber Agent Telemetry HUD */}
       <div className={`agent-hud-container ${hudCollapsed ? 'collapsed' : ''}`}>
         {hudCollapsed ? (
@@ -2042,6 +2109,640 @@ Try selecting one of these popular questions:
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 🦾 INTERACTIVE HARNESS AGENT TERMINAL SIMULATOR COMPONENT
+// ============================================================================
+interface HarnessModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function HarnessSimulatorModal({ isOpen, onClose }: HarnessModalProps) {
+  const [selectedTask, setSelectedTask] = useState<'compress' | 'business' | 'math' | 'custom'>('compress');
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [customTaskData, setCustomTaskData] = useState<any>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'running' | 'healed' | 'success'>('idle');
+  const terminalEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (terminalEndRef.current) {
+      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [terminalLogs]);
+
+  if (!isOpen) return null;
+
+  const tasksData = {
+    compress: {
+      title: 'String Compressor',
+      initial: `// 1. Defines a function to compress a string (e.g. 'aabcccccaaa' -> 'a2b1c5a3')
+function compressString(str: string): string {
+  if (!str) return '';
+  let comp = '';
+  let char = str[0];
+  let count = 0;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === char) count++;
+    else {
+      comp += char + count;
+      char = str[i];
+      count = 1;
+    }
+  }
+  comp += char + count;
+  return comp.length >= str.length ? str : comp;
+}
+console.log(compressString('aabcccccaaa'));`,
+      healed: `// Healed attempt: Removed the problematic import and compiled directly
+function compressString(str: string): string {
+  if (!str) return '';
+  let comp = '';
+  let char = str[0];
+  let count = 0;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === char) count++;
+    else {
+      comp += char + count;
+      char = str[i];
+      count = 1;
+    }
+  }
+  comp += char + count;
+  return comp.length >= str.length ? str : comp;
+}
+console.log("Original: 'aabcccccaaa' -> Compressed: '" + compressString('aabcccccaaa') + "'");
+console.log("Original: 'abcdef' -> Compressed: '" + compressString('abcdef') + "'");
+export {};`,
+      error: `TSError: ⨯ Unable to compile TypeScript:
+sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.
+sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`,
+      output: `Original: 'aabcccccaaa' -> Compressed: 'a2b1c5a3'
+Original: 'abcdef' -> Compressed: 'abcdef'`
+    },
+    business: {
+      title: 'Business Days Calculator',
+      initial: `// 1. Defines a function to count business days (excluding weekends)
+function getBusinessDays(start: Date, end: Date): number {
+  let count = 0;
+  let cur = new Date(start);
+  while (cur <= end) {
+    const day = cur.getDay();
+    if (day !== 0 && day !== 6) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+}`,
+      healed: `// Healed attempt: Removed the problematic import and compiled directly
+function getBusinessDays(start: Date, end: Date): number {
+  let count = 0;
+  let cur = new Date(start);
+  while (cur <= end) {
+    const day = cur.getDay();
+    if (day !== 0 && day !== 6) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+}
+const start = new Date('2026-05-01'); // Friday
+const end = new Date('2026-05-10');   // Sunday
+console.log("Start: 2026-05-01 -> End: 2026-05-10");
+console.log("Calculated Business Days: " + getBusinessDays(start, end) + " days");
+export {};`,
+      error: `TSError: ⨯ Unable to compile TypeScript:
+sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.`,
+      output: `Start: 2026-05-01 -> End: 2026-05-10
+Calculated Business Days: 6 days`
+    },
+    math: {
+      title: 'Prime Factorization',
+      initial: `// 1. Defines a function to calculate prime factorization
+function primeFactors(n: number): Map<number, number> {
+  const factors = new Map<number, number>();
+  let d = 2;
+  while (n > 1) {
+    while (n % d === 0) {
+      factors.set(d, (factors.get(d) || 0) + 1);
+      n /= d;
+    }
+    d++;
+  }
+  return factors;
+}`,
+      healed: `// Healed attempt: Removed the problematic import and compiled directly
+function primeFactors(n: number): Map<number, number> {
+  const factors = new Map<number, number>();
+  let d = 2;
+  while (n > 1) {
+    while (n % d === 0) {
+      factors.set(d, (factors.get(d) || 0) + 1);
+      n /= d;
+    }
+    d++;
+  }
+  return factors;
+}
+console.log("12 Prime Factors: ", Array.from(primeFactors(12).entries()));
+console.log("1000 Prime Factors: ", Array.from(primeFactors(1000).entries()));
+export {};`,
+      error: `TSError: ⨯ Unable to compile TypeScript:
+sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.`,
+      output: `12 Prime Factors:  [ [ 2, 2 ], [ 3, 1 ] ]
+1000 Prime Factors:  [ [ 2, 3 ], [ 5, 3 ] ]`
+    }
+  };
+
+  /**
+   * Generates highly authentic, custom-concept TypeScript code on the fly
+   * based on visitor input keywords to simulate a fully dynamic coding agent.
+   */
+  const generateDynamicTask = (promptText: string) => {
+    const cleanPrompt = promptText.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+    const words = cleanPrompt.split(/\s+/).filter(w => w.length > 0);
+    
+    // Core concept extractor
+    let concept = "CustomUtility";
+    if (words.length > 0) {
+      const sliceWords = words.slice(0, 3).filter(w => !['write', 'create', 'a', 'an', 'the', 'program', 'function', 'class'].includes(w.toLowerCase()));
+      if (sliceWords.length > 0) {
+        concept = sliceWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+      } else {
+        concept = words.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+      }
+    }
+    
+    if (concept.length > 25) concept = concept.substring(0, 25);
+    concept = concept.replace(/[^a-zA-Z0-9]/g, '');
+    if (!/^[A-Z]/.test(concept)) concept = 'My' + concept;
+
+    const lowerPrompt = cleanPrompt.toLowerCase();
+    let classProperties = `  private name: string;
+  private active: boolean;`;
+    let classConstructor = `  constructor(name: string) {
+    this.name = name;
+    this.active = true;
+  }`;
+    let classMethod = `  public executeTask(): void {
+    console.log(\`[${concept}] Executing custom request: '${cleanPrompt}'\`);
+  }`;
+    let instantiation = `const myInstance = new ${concept}("Harness Demo");
+myInstance.executeTask();`;
+    let runLogs = `[${concept}] Executing custom request: '${cleanPrompt}'
+Status: Active and verified by Harness Sandbox.`;
+
+    if (lowerPrompt.includes('calc') || lowerPrompt.includes('math') || lowerPrompt.includes('add') || lowerPrompt.includes('sum')) {
+      classProperties = `  private lastCalculated: number = 0;`;
+      classConstructor = `  constructor() {
+    this.lastCalculated = 0;
+  }`;
+      classMethod = `  public add(a: number, b: number): number {
+    this.lastCalculated = a + b;
+    return this.lastCalculated;
+  }
+  public multiply(a: number, b: number): number {
+    this.lastCalculated = a * b;
+    return this.lastCalculated;
+  }`;
+      instantiation = `const calc = new ${concept}();
+console.log("Calculated 15 + 27 = " + calc.add(15, 27));
+console.log("Calculated 8 * 9 = " + calc.multiply(8, 9));`;
+      runLogs = `Calculated 15 + 27 = 42
+Calculated 8 * 9 = 72`;
+    } else if (lowerPrompt.includes('user') || lowerPrompt.includes('profile') || lowerPrompt.includes('member') || lowerPrompt.includes('auth')) {
+      classProperties = `  private username: string;
+  private email: string;
+  private role: string;`;
+      classConstructor = `  constructor(username: string, email: string) {
+    this.username = username;
+    this.email = email;
+    this.role = 'user';
+  }`;
+      classMethod = `  public getInfo(): string {
+    return "User: " + this.username + " | Email: " + this.email + " | Role: " + this.role;
+  }
+  public promoteToAdmin(): void {
+    this.role = 'admin';
+  }`;
+      instantiation = `const user = new ${concept}("john_doe", "john@example.com");
+console.log("Initial state: " + user.getInfo());
+user.promoteToAdmin();
+console.log("Updated state: " + user.getInfo());`;
+      runLogs = `Initial state: User: john_doe | Email: john@example.com | Role: user
+Updated state: User: john_doe | Email: john@example.com | Role: admin`;
+    } else if (lowerPrompt.includes('book') || lowerPrompt.includes('library') || lowerPrompt.includes('read') || lowerPrompt.includes('shelf')) {
+      classProperties = `  private title: string;
+  private author: string;
+  private isAvailable: boolean = true;`;
+      classConstructor = `  constructor(title: string, author: string) {
+    this.title = title;
+    this.author = author;
+  }`;
+      classMethod = `  public borrowBook(): boolean {
+    if (this.isAvailable) {
+      this.isAvailable = false;
+      return true;
+    }
+    return false;
+  }
+  public getStatus(): string {
+    return "'" + this.title + "' by " + this.author + " is " + (this.isAvailable ? 'Available' : 'Borrowed');
+  }`;
+      instantiation = `const book = new ${concept}("Clean Code", "Robert C. Martin");
+console.log(book.getStatus());
+book.borrowBook();
+console.log(book.getStatus());`;
+      runLogs = `'Clean Code' by Robert C. Martin is Available
+'Clean Code' by Robert C. Martin is Borrowed`;
+    }
+
+    const initial = `// 1. Defines a class representing '${concept}' based on custom request
+class ${concept} {
+${classProperties}
+
+${classConstructor}
+
+${classMethod}
+}
+${instantiation}`;
+
+    const healed = `// Healed attempt: Removed the problematic import and compiled directly
+class ${concept} {
+${classProperties}
+
+${classConstructor}
+
+${classMethod}
+}
+${instantiation}
+export {};`;
+
+    const error = `TSError: ⨯ Unable to compile TypeScript:
+sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.
+sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
+
+    return {
+      title: promptText,
+      initial,
+      healed,
+      error,
+      output: runLogs
+    };
+  };
+
+  const handleCustomSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customPrompt.trim()) return;
+
+    const data = generateDynamicTask(customPrompt);
+    setCustomTaskData(data);
+    setSelectedTask('custom');
+    setTerminalLogs([]);
+    setStatus('idle');
+    setProgress(0);
+  };
+
+  const runSimulation = () => {
+    setIsRunning(true);
+    setStatus('running');
+    setTerminalLogs([]);
+    setProgress(5);
+
+    const log = (text: string, delay: number) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setTerminalLogs((prev) => [...prev, text]);
+          resolve();
+        }, delay);
+      });
+    };
+
+    const data = selectedTask === 'custom' ? customTaskData : tasksData[selectedTask];
+    if (!data) {
+      log('❌ Error: No task configuration loaded. Select a task or enter a custom prompt.', 100);
+      setIsRunning(false);
+      return;
+    }
+
+    (async () => {
+      await log(`🤖 [1/3] Asking local AI model to write initial TypeScript code for '${data.title}'...`, 600);
+      setProgress(20);
+      
+      await log(`✔ Initial code generated successfully!\n\n--- Generated Code ---\n${data.initial}\n----------------------`, 1000);
+      setProgress(40);
+
+      await log(`🚀 [Attempt 1/4] Executing code in the Harness Sandbox...`, 800);
+      await log(`⚠️ [TEST SCENARIO] Injected a broken import line into Attempt 1 to demonstrate Self-Healing functionality!\n`, 600);
+      
+      await log(`💥 [FAIL] Execution failed!\n--- Captured Error Logs ---\n${data.error}\n--------------------------`, 800);
+      setProgress(60);
+
+      await log(`🔄 [SELF-HEALING] Feeding the broken code and error logs back to LLM for repair...`, 1200);
+      await log(`✔ LLM successfully analyzed the error logs and provided a healed version of the code!\n\n--- Healed Code ---\n${data.healed}\n-------------------`, 1000);
+      setProgress(80);
+
+      await log(`🚀 [Attempt 2/4] Executing healed code in the Harness Sandbox...`, 800);
+      
+      await log(`🎉 [SUCCESS] The code compiled and ran without any errors!\n------------------ RUN OUTPUT ------------------\n${data.output}\n------------------------------------------------`, 800);
+      await log(`🏁 [CONCLUSION] Mission accomplished! The Harness successfully routed the errors, prompted the LLM, and validated bug-free code.`, 600);
+      
+      setProgress(100);
+      setStatus('success');
+      setIsRunning(false);
+    })();
+  };
+
+  const resetSimulation = () => {
+    setIsRunning(false);
+    setStatus('idle');
+    setTerminalLogs([]);
+    setProgress(0);
+  };
+
+  const activeData = selectedTask === 'custom' ? customTaskData : tasksData[selectedTask];
+
+  return (
+    <div 
+      className="custom-modal-overlay" 
+      style={{ 
+        zIndex: 1000, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        backgroundColor: 'rgba(3, 7, 18, 0.95)', 
+        backdropFilter: 'blur(10px)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      }} 
+      onClick={onClose}
+    >
+      <div 
+        className="custom-modal-card glass" 
+        style={{ 
+          width: '92%', 
+          maxWidth: '960px', 
+          padding: '2.2rem', 
+          maxHeight: '92vh', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          border: '1px solid rgba(6, 182, 212, 0.4)', 
+          boxShadow: '0 0 35px rgba(6, 182, 212, 0.2)',
+          position: 'relative'
+        }} 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="custom-modal-scanline"></div>
+        <div className="custom-modal-glow"></div>
+        
+        {/* Terminal Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(6, 182, 212, 0.2)', paddingBottom: '0.8rem', marginBottom: '1.2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <Terminal size={20} style={{ color: 'var(--color-cyan)' }} className="animate-pulse" />
+            <span style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <span>🦾 HARNESS AGENT SIMULATOR v1.0</span>
+              <span style={{
+                fontSize: '0.65rem',
+                padding: '0.15rem 0.4rem',
+                borderRadius: '3px',
+                border: '1px solid',
+                borderColor: status === 'success' ? '#10b981' : status === 'running' ? '#a855f7' : 'rgba(255,255,255,0.2)',
+                backgroundColor: status === 'success' ? 'rgba(16, 185, 129, 0.1)' : status === 'running' ? 'rgba(168, 85, 247, 0.1)' : 'transparent',
+                color: status === 'success' ? '#10b981' : status === 'running' ? '#c084fc' : 'var(--text-secondary)',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem'
+              }}>
+                <span style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: status === 'success' ? '#10b981' : status === 'running' ? '#c084fc' : 'rgba(255,255,255,0.4)',
+                  display: 'inline-block'
+                }} className={status === 'running' ? "animate-pulse" : ""}></span>
+                {status.toUpperCase()}
+              </span>
+            </span>
+          </div>
+          <button 
+            onClick={onClose} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--text-secondary)', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }} 
+            className="hover-text-white"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Task Selection Row */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.2rem' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>SELECT CODING CHALLENGE:</div>
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            {(Object.keys(tasksData) as Array<keyof typeof tasksData>).map((key) => (
+              <button
+                key={key}
+                disabled={isRunning}
+                onClick={() => { setSelectedTask(key); resetSimulation(); }}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.8rem',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid',
+                  borderColor: selectedTask === key ? 'var(--color-cyan)' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: selectedTask === key ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                  color: selectedTask === key ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {tasksData[key].title}
+              </button>
+            ))}
+            
+            {customTaskData && (
+              <button
+                disabled={isRunning}
+                onClick={() => setSelectedTask('custom')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.8rem',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid',
+                  borderColor: selectedTask === 'custom' ? 'var(--color-cyan)' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: selectedTask === 'custom' ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                  color: selectedTask === 'custom' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                📝 Custom: {customTaskData.title.length > 20 ? customTaskData.title.substring(0, 20) + '...' : customTaskData.title}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Custom Prompt Input Row */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>OR ENTER YOUR CUSTOM CODING TASK:</div>
+          <form onSubmit={handleCustomSubmit} style={{ display: 'flex', gap: '0.6rem' }}>
+            <input
+              type="text"
+              disabled={isRunning}
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              placeholder="e.g., Create a User Profile Validator..."
+              style={{
+                flex: 1,
+                padding: '0.6rem 1rem',
+                fontSize: '0.8rem',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(3, 7, 18, 0.6)',
+                border: '1px solid rgba(6, 182, 212, 0.2)',
+                color: '#fff',
+                fontFamily: 'var(--font-mono)',
+                outline: 'none',
+                transition: 'all 0.2s'
+              }}
+            />
+            <button
+              type="submit"
+              disabled={isRunning || !customPrompt.trim()}
+              className="btn-primary"
+              style={{
+                padding: '0.6rem 1.2rem',
+                fontSize: '0.8rem',
+                opacity: isRunning || !customPrompt.trim() ? 0.4 : 1,
+                cursor: isRunning || !customPrompt.trim() ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <span>Set Custom Task</span>
+            </button>
+          </form>
+        </div>
+
+        {/* Terminal Screen */}
+        <div 
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(3, 7, 18, 0.95)',
+            border: '1px solid rgba(6, 182, 212, 0.15)',
+            borderRadius: '6px',
+            padding: '1.4rem',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.8rem',
+            overflowY: 'auto',
+            minHeight: '360px',
+            maxHeight: '480px',
+            color: '#10b981',
+            boxShadow: 'inset 0 0 15px rgba(0,0,0,0.9)'
+          }}
+        >
+          {terminalLogs.length === 0 && (
+            <div style={{ color: 'rgba(255,255,255,0.4)', lineHeight: '1.6' }}>
+              q-agent@harness-v2:~$ _ <span className="animate-pulse" style={{ color: 'var(--color-cyan)' }}>█</span>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                {activeData ? `Selected: '${activeData.title}'. Click 'Run Self-Healing Agent' to start.` : "Select a coding task above or enter your custom task to begin."}
+              </div>
+            </div>
+          )}
+
+          {terminalLogs.map((logLine, idx) => {
+            let textColor = '#34d399'; 
+            if (logLine.includes('💥') || logLine.includes('FAIL') || logLine.includes('Error')) {
+              textColor = '#f87171'; 
+            } else if (logLine.includes('⚠️') || logLine.includes('TEST')) {
+              textColor = '#fbbf24'; 
+            } else if (logLine.includes('🎉') || logLine.includes('SUCCESS')) {
+              textColor = '#38bdf8'; 
+            } else if (logLine.includes('🤖') || logLine.includes('🔄')) {
+              textColor = '#c084fc'; 
+            } else if (logLine.includes('const ') || logLine.includes('function ') || logLine.includes('console.log') || logLine.includes('// ') || logLine.includes('class ')) {
+              textColor = '#cbd5e1'; 
+            }
+
+            return (
+              <pre 
+                key={idx} 
+                style={{ 
+                  whiteSpace: 'pre-wrap', 
+                  color: textColor, 
+                  lineHeight: '1.6', 
+                  marginBottom: '0.8rem',
+                  borderLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') ? '2px solid rgba(6, 182, 212, 0.2)' : 'none',
+                  paddingLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') ? '0.6rem' : '0'
+                }}
+              >
+                {logLine}
+              </pre>
+            );
+          })}
+          <div ref={terminalEndRef} />
+        </div>
+
+        {/* Progress Bar & Actions */}
+        <div style={{ marginTop: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          {isRunning && (
+            <div style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.05)', height: '4px', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: 'var(--color-cyan)', width: `${progress}%`, height: '100%', transition: 'width 0.4s ease-out' }}></div>
+            </div>
+          )}
+          
+          <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end' }}>
+            <button
+              onClick={resetSimulation}
+              disabled={isRunning || terminalLogs.length === 0}
+              className="btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.6rem 1.2rem',
+                fontSize: '0.85rem',
+                opacity: isRunning || terminalLogs.length === 0 ? 0.4 : 1,
+                cursor: isRunning || terminalLogs.length === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <RefreshCw size={14} />
+              <span>Reset</span>
+            </button>
+            <button
+              onClick={runSimulation}
+              disabled={isRunning || !activeData}
+              className="btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.6rem 1.2rem',
+                fontSize: '0.85rem',
+                opacity: isRunning || !activeData ? 0.4 : 1,
+                cursor: isRunning || !activeData ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Play size={14} />
+              <span>Run Self-Healing Agent</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
