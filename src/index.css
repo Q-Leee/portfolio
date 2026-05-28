@@ -1790,7 +1790,7 @@ button {
 
 .agent-hud-panel {
   width: 380px;
-  height: 220px;
+  height: 178px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
@@ -2069,5 +2069,88 @@ button {
   color: var(--color-cyan);
   animation: pulse-glow 1s infinite alternate;
 }
+
+/* ============================================================================
+   🎨 NEW STYLING UPGRADES: SYSTEM ARCHITECTURE & PORTFOLIO REDESIGN
+   ============================================================================ */
+
+/* Fade-In Animation */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover Utilities */
+.hover-text-cyan {
+  transition: var(--transition-smooth);
+}
+.hover-text-cyan:hover {
+  color: var(--color-cyan) !important;
+  transform: translateY(-2px);
+}
+
+/* System Architecture Snapshots Dashboard Layout */
+.architecture-dashboard {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  transition: var(--transition-smooth);
+}
+
+@media (max-width: 968px) {
+  #architecture div[style*="grid-template-columns"], 
+  #architecture div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  #architecture div[style*="borderLeft"], 
+  #architecture div[style*="border-left"] {
+    border-left: none !important;
+    border-top: 1px solid var(--border-color) !important;
+    padding-left: 0 !important;
+    padding-top: 2rem !important;
+  }
+}
+
+/* Compact grid rules for archive projects */
+@media (max-width: 968px) {
+  #projects div[style*="grid-template-columns"], 
+  #projects div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 969px) and (max-width: 1200px) {
+  #projects div[style*="grid-template-columns"], 
+  #projects div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Responsive custom spacing */
+.project-details-block strong {
+  font-family: var(--font-mono);
+}
+
+.connection-item {
+  transition: var(--transition-smooth);
+}
+.connection-item:hover {
+  border-color: var(--color-cyan);
+  background: rgba(57, 255, 20, 0.02);
+}
+
 
 

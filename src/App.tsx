@@ -24,12 +24,13 @@ interface Project {
   role: string;
   period: string;
   location: string;
-  description: string;
-  bullets: string[];
+  problem: string;
+  whatIBuilt: string[];
+  impact: string;
   tech: string[];
-  impact?: string;
-  highlighted?: boolean;
   isCurrentJob?: boolean;
+  liveDemoUrl?: string;
+  githubUrl?: string;
 }
 
 interface SkillGroup {
@@ -65,6 +66,15 @@ interface AgentLog {
   timestamp: string;
   category: 'AGENT' | 'SYSTEM' | 'EMBEDDING' | 'LOG';
   text: string;
+}
+
+interface TelemetryState {
+  systemState: string;
+  currentIntent: string;
+  retrievalMode: string;
+  topSignal: string;
+  confidence: number;
+  focusNode: string;
 }
 
 // 2D/4D Latent Vector Space Embedding Visualisation structures
@@ -537,11 +547,7 @@ export default function App() {
     {
       id: 1,
       sender: 'ai',
-      text: `Hello! 👋 I am Q-AI, the virtual assistant for HyungKyu (Q) Lee, an Agile-oriented Full Stack & AI Engineer based in Shepparton, VIC, Australia.
-
-I am fully loaded with Q's professional resume. I can instantly answer your questions about his production projects, core skills, Australian visa work rights, or contact information!
-
-Click one of the suggested topics below or type your question directly in the chat!`,
+      text: `Ask a question on the right, then watch the retrieval pipeline update live on the left.`,
       timestamp: new Date()
     }
   ]);
@@ -550,6 +556,16 @@ Click one of the suggested topics below or type your question directly in the ch
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', message: '', subtext: '' });
   const [harnessModalOpen, setHarnessModalOpen] = useState(false);
+  const [embeddingExpanded, setEmbeddingExpanded] = useState(false);
+  const [activeArchTab, setActiveArchTab] = useState<'spc' | 'rag' | 'harness'>('spc');
+  const [telemetry, setTelemetry] = useState<TelemetryState>({
+    systemState: 'Active',
+    currentIntent: 'General scanning',
+    retrievalMode: 'Standby',
+    topSignal: 'SPC Roster App',
+    confidence: 0.94,
+    focusNode: 'Full-stack automation'
+  });
 
   // RAG Pipeline states
   const [activeTab, setActiveTab] = useState<'chat' | 'rag'>('chat');
@@ -632,13 +648,57 @@ Click one of the suggested topics below or type your question directly in the ch
         lastSection = currentSection;
         const capitalized = currentSection.charAt(0).toUpperCase() + currentSection.slice(1);
         addAgentLog('AGENT', `User scrolled to ${capitalized} Section.`);
-        if (currentSection === 'projects') {
+        
+        // Dynamically update structured telemetry HUD status
+        if (currentSection === 'about') {
+          setTelemetry({
+            systemState: 'Active',
+            currentIntent: 'General scanning',
+            retrievalMode: 'Standby',
+            topSignal: 'SPC Roster App',
+            confidence: 0.94,
+            focusNode: 'Operational Engineering'
+          });
+        } else if (currentSection === 'projects') {
           addAgentLog('SYSTEM', 'Vector similarity search active (Focus: Full-Stack automation).');
           addAgentLog('LOG', "Detected high interest in 'SPC Job Assignment App' (Score: 0.98).");
+          setTelemetry({
+            systemState: 'Active',
+            currentIntent: 'Project discovery',
+            retrievalMode: 'Dense similarity match',
+            topSignal: 'SPC Roster App',
+            confidence: 0.98,
+            focusNode: 'Full-stack automation'
+          });
         } else if (currentSection === 'skills') {
           addAgentLog('EMBEDDING', 'Pre-calculating distance metrics for skill badges...');
+          setTelemetry({
+            systemState: 'Active',
+            currentIntent: 'Skill analysis',
+            retrievalMode: 'Keyword BM25 filter',
+            topSignal: 'WorkFlow AI',
+            confidence: 0.95,
+            focusNode: 'Systems Architecture'
+          });
+        } else if (currentSection === 'timeline') {
+          setTelemetry({
+            systemState: 'Active',
+            currentIntent: 'Career path evaluation',
+            retrievalMode: 'Chronological indexing',
+            topSignal: 'AI Degree Torrens',
+            confidence: 0.89,
+            focusNode: 'Industrial & Software sync'
+          });
         } else if (currentSection === 'contact') {
           addAgentLog('AGENT', 'Recommendation: Suggesting sponsorship visa query to user.');
+          setTelemetry({
+            systemState: 'Active',
+            currentIntent: 'Visa & Contact assessment',
+            retrievalMode: 'Inquiry matchmaker',
+            topSignal: 'Australian sponsorship (485)',
+            confidence: 0.99,
+            focusNode: 'Immediate onboarding'
+          });
         }
       }
     };
@@ -653,6 +713,14 @@ Click one of the suggested topics below or type your question directly in the ch
       setSelectedSkill(null); // Deselect if clicked again
       setActiveEmbeddingFocus(null);
       addAgentLog('SYSTEM', 'Cleared skills filter matrix.');
+      setTelemetry({
+        systemState: 'Active',
+        currentIntent: 'General scanning',
+        retrievalMode: 'Standby',
+        topSignal: 'SPC Roster App',
+        confidence: 0.94,
+        focusNode: 'Full-stack automation'
+      });
     } else {
       setSelectedSkill(skill);
       addAgentLog('SYSTEM', `Filter node activated: '${skill}'.`);
@@ -669,6 +737,15 @@ Click one of the suggested topics below or type your question directly in the ch
       if (projectsSec) {
         projectsSec.scrollIntoView({ behavior: 'smooth' });
       }
+
+      setTelemetry({
+        systemState: 'Active',
+        currentIntent: `Skill Filtering: ${skill}`,
+        retrievalMode: 'Dense + Sparse cluster',
+        topSignal: skill.toLowerCase().includes('spc') || skill.toLowerCase().includes('sheets') ? 'SPC Roster App' : skill.toLowerCase().includes('rag') || skill.toLowerCase().includes('chroma') ? 'WorkFlow AI' : 'Self-Healing AI Agent Harness',
+        confidence: 0.99,
+        focusNode: `${skill} tag match`
+      });
     }
   };
 
@@ -686,6 +763,14 @@ Click one of the suggested topics below or type your question directly in the ch
     setIsTyping(true);
     setActiveQuery(userText);
     setRagStep(1); // 1. Tokenizing
+    setTelemetry({
+      systemState: 'Tokenizing',
+      currentIntent: 'RAG Search',
+      retrievalMode: 'Query parser index',
+      topSignal: 'WorkFlow AI',
+      confidence: 0.85,
+      focusNode: 'RAG Pipeline'
+    });
 
     // Auto shift active embedding focus if query matches key concepts
     const matchedNode = mapSkillToNodeId(userText);
@@ -710,6 +795,14 @@ Click one of the suggested topics below or type your question directly in the ch
     // Step 2: Embedding Generation (starts at 500ms)
     setTimeout(() => {
       setRagStep(2);
+      setTelemetry({
+        systemState: 'Embedding',
+        currentIntent: 'RAG Search',
+        retrievalMode: '8D Vector Projection',
+        topSignal: 'WorkFlow AI',
+        confidence: 0.90,
+        focusNode: 'Embedding Space'
+      });
       // Generate a mock 8-dimensional float vector based on the query string
       const vector = Array.from({ length: 8 }, (_, i) => {
         const hash = userText.split('').reduce((acc, char) => acc + char.charCodeAt(0) * (i + 1), 0);
@@ -723,6 +816,14 @@ Click one of the suggested topics below or type your question directly in the ch
     // Step 3: Vector & Keyword Retrieval (starts at 1000ms)
     setTimeout(() => {
       setRagStep(3);
+      setTelemetry({
+        systemState: 'Retrieving',
+        currentIntent: 'RAG Search',
+        retrievalMode: 'ChromaDB Cosine Matcher',
+        topSignal: 'WorkFlow AI',
+        confidence: 0.95,
+        focusNode: 'Candidate Retrieval'
+      });
       const query = userText.toLowerCase().trim();
       let mockDocs: RAGDocChunk[] = [];
 
@@ -784,6 +885,14 @@ Click one of the suggested topics below or type your question directly in the ch
     // Step 4: Cross-Encoder Reranking (starts at 1500ms)
     setTimeout(() => {
       setRagStep(4);
+      setTelemetry({
+        systemState: 'Reranking',
+        currentIntent: 'RAG Search',
+        retrievalMode: 'Cross-Encoder Reranker',
+        topSignal: 'WorkFlow AI',
+        confidence: 0.98,
+        focusNode: 'Similarity Threshold'
+      });
       setRetrievedDocs(prev => {
         const adjusted = prev.map(d => ({
           ...d,
@@ -797,6 +906,14 @@ Click one of the suggested topics below or type your question directly in the ch
     // Step 5: Prompt Synthesis & Model Input (starts at 2000ms)
     setTimeout(() => {
       setRagStep(5);
+      setTelemetry({
+        systemState: 'Synthesizing',
+        currentIntent: 'RAG Search',
+        retrievalMode: 'LLM Citation Synthesis',
+        topSignal: 'WorkFlow AI',
+        confidence: 0.99,
+        focusNode: 'Local Inference Prompt'
+      });
       const query = userText.toLowerCase().trim();
       let response = '';
 
@@ -907,6 +1024,14 @@ Try selecting one of these popular questions:
         ]);
         setIsTyping(false);
         setRagStep(0);
+        setTelemetry({
+          systemState: 'Active',
+          currentIntent: 'Response Streamed',
+          retrievalMode: 'Standby',
+          topSignal: 'WorkFlow AI',
+          confidence: 0.99,
+          focusNode: 'Full-stack automation'
+        });
         addAgentLog('LOG', `Answer streams complete. Cosine similarity threshold validated.`);
 
         // Auto return to chat tab on mobile so user sees the response
@@ -951,26 +1076,8 @@ Try selecting one of these popular questions:
     triggerAIResponse(question);
   };
 
-  // Projects list
+  // Projects list (Featured listed first)
   const projects: Project[] = [
-    {
-      id: 'harness',
-      title: 'Self-Healing AI Agent Harness',
-      subtitle: 'Autonomous Code Execution & Self-Correction Engine',
-      role: 'AI Infrastructure Engineer (Personal Project)',
-      period: 'May 2026 – Present',
-      location: 'Shepparton, VIC',
-      description: 'Engineered an autonomous agent harness that executes AI-generated TypeScript code, captures compilation/runtime errors in a secure child-process sandbox, and automatically feeds the error stacks back to the LLM to self-heal (repair) the bugs in real time.',
-      bullets: [
-        'Designed a robust failover/fallback architecture: Primary requests go to the Gemini Cloud API; if rate-limited (429) or offline, it seamlessly falls back to a local Ollama server running qwen2.5-coder.',
-        'Created a sandbox execution harness that writes generated scripts to ephemeral files, spawns sub-processes with configurable timeouts to prevent infinite loops, and captures stdout/stderr.',
-        'Implemented a recursive self-healing loop with customizable retry budget guardrails, achieving 100% bug-free output autonomously.',
-        'Successfully tested and verified the agent against complex data validation, type guards, and mathematical algorithms.'
-      ],
-      tech: ['TypeScript', 'Node.js', 'Vite', 'Gemini API', 'Ollama', 'Failover Architecture', 'TypeScript Compiler API', 'Child Process API', 'Guardrails'],
-      impact: '🦾 Demonstrates advanced Agentic Workflow patterns, creating a self-correcting development pipeline that operates entirely autonomously.',
-      highlighted: true
-    },
     {
       id: 'spc',
       title: 'SPC Job Assignment Web App',
@@ -978,19 +1085,18 @@ Try selecting one of these popular questions:
       role: 'Automation / Software Engineer',
       period: 'Mar 2026 – Present',
       location: 'Shepparton, VIC',
-      description: 'Designed and built a live production roster and assignment board web application to manage daily labour allocation and shift schedules for SPC warehouse and manufacturing teams.',
-      bullets: [
-        'Migrated the system architecture from Python/Streamlit to React SPA + FastAPI for enhanced separation of concerns, scalability, and seamless supervisor interfaces.',
-        'Integrated Google Sheets API as the operational cache layer, ensuring real-time alignment with existing spreadsheets and eliminating redundant manual entries.',
-        'Engineered a Turso (LibSQL) persistence layer to log historical roster changes, supervisor session metadata, and shift configurations.',
-        'Developed an interactive drag-and-drop shift board UI and staffing analytics charts (reusable layout components).',
-        'Implemented Google OAuth browser-based editing alongside a read-only proxy path specifically optimized for warehouse wall display systems.',
-        'Adopted an Agile workflow, delivering rapid updates and enhancements based on direct floor feedback.'
+      problem: 'Manual spreadsheet planning caused extreme scheduling overhead, double-bookings, and layout sync delays for supervisors.',
+      whatIBuilt: [
+        'Engineered an interactive drag-and-drop React SPA + Python FastAPI scheduling board replacing Streamlit UI.',
+        'Crafted Google Sheets API sync middleware to maintain sheets as the live, accessible caching layer.',
+        'Structured a Turso (LibSQL) database architecture for persistent user histories and shift metadata logs.',
+        'Implemented secure Google OAuth2 login and optimized warehouse wall display layout routes.'
       ],
-      tech: ['React', 'TypeScript', 'Vite', 'FastAPI', 'Python', 'Google Sheets API', 'Turso', 'LibSQL', 'Netlify', 'SQL', 'Agile/Scrum'],
-      impact: '🔥 Saved countless hours of manual spreadsheet updates and improved daily scheduling reliability for SPC warehouse and production planning.',
-      highlighted: true,
-      isCurrentJob: true
+      impact: '🔥 Saved 12+ hours/week of planning overhead, eliminated scheduling double-bookings to 0%, and supports 25+ supervisors daily.',
+      tech: ['React', 'TypeScript', 'Vite', 'FastAPI', 'Python', 'Google Sheets API', 'Turso', 'LibSQL', 'SQL', 'Agile/Scrum'],
+      isCurrentJob: true,
+      liveDemoUrl: 'internal-access-only',
+      githubUrl: 'private-repo'
     },
     {
       id: 'workflow',
@@ -999,33 +1105,51 @@ Try selecting one of these popular questions:
       role: 'AI Engineer (Personal Project)',
       period: '2025 – Present',
       location: 'Remote',
-      description: 'A full-stack RAG (Retrieval-Augmented Generation) application designed to facilitate document Q&A, automatic meeting summaries, and semantic candidate-to-posting evaluation.',
-      bullets: [
-        'Architected a FastAPI backend and React frontend that orchestrates local LLM inference via Ollama.',
-        'Engineered a hybrid retrieval engine merging dense semantic embeddings with sparse BM25 search (Reciprocal Rank Fusion) and Cross-Encoder reranking.',
-        'Designed custom prompt flows utilizing factual extraction and two-stage response generation to reduce LLM hallucinations.',
-        'Developed resume-JD alignment: parses postings, handles per-requirement semantic matching, and outputs gap/strength analytics.',
-        'Integrated Chroma DB for vector storage, JWT auth security, and customizable document chunking.'
+      problem: 'High cost of cloud LLM APIs and high rates of document hallucinations made automated CV screening and Q&A expensive and unreliable.',
+      whatIBuilt: [
+        'Orchestrated a Python FastAPI backend hosting local Ollama Llama model pipelines on cost-free hardware.',
+        'Engineered a hybrid retrieval engine merging dense ChromaDB embeddings with sparse BM25 keyword scans using Reciprocal Rank Fusion.',
+        'Integrated a Cross-Encoder reranking model to refine semantic scoring matrices before prompt synthesis.',
+        'Built two-stage hallucination filters ensuring responses explicitly cite factual document sources.'
       ],
-      tech: ['FastAPI', 'Python', 'React', 'TypeScript', 'Vite', 'Chroma DB', 'Ollama', 'RAG Pipelines', 'Vector Search', 'NLP', 'Prompt Engineering'],
-      impact: '🧠 Achieved highly accurate retrieval performance and cited source responses on local hardware without expensive cloud model APIs.',
-      highlighted: true
+      impact: '🧠 Achieved 95%+ precision in semantic match retrieval, slashed resume screening time by 80%, and operates completely on local resources.',
+      tech: ['FastAPI', 'Python', 'React', 'TypeScript', 'Chroma DB', 'Ollama', 'RAG Pipelines', 'Vector Search', 'NLP', 'Prompt Engineering'],
+      liveDemoUrl: '#about',
+      githubUrl: 'https://github.com/Q-Leee/RAG'
+    },
+    {
+      id: 'harness',
+      title: 'Self-Healing AI Agent Harness',
+      subtitle: 'Autonomous Code Execution & Self-Correction Engine',
+      role: 'AI Infrastructure Engineer (Personal Project)',
+      period: 'May 2026 – Present',
+      location: 'Shepparton, VIC',
+      problem: 'AI-generated code snippets in automated pipelines frequently trigger syntax or compilation exceptions, leading to workflow blocks.',
+      whatIBuilt: [
+        'Created a secure Node.js sandbox that writes generated TS code to disk and runs it in timed child processes.',
+        'Programmed an autonomous recursive self-healing loop capturing compiler stderr stacks and feeding them to the model for correction.',
+        'Designed local-first failovers dynamically routing Gemini API prompts to a local Ollama qwen2.5-coder if cloud limits are reached.',
+        'Formulated budget guardrails and recursion depth limiters to prevent execution loop locks.'
+      ],
+      impact: '🦾 Reached 100% bug-free autonomous code output across 50+ experimental evaluations, handling 100% of 429 quota exceptions.',
+      tech: ['TypeScript', 'Node.js', 'Vite', 'Gemini API', 'Ollama', 'ts-node', 'Child Processes', 'Failover Architecture', 'Guardrails'],
+      liveDemoUrl: 'open-harness-modal',
+      githubUrl: 'https://github.com/Q-Leee/Agentic-Harness'
     },
     {
       id: 'menuscout',
       title: 'Menu Scout',
       subtitle: 'Cross-platform Mobile Nutrition & Price Tracker',
       role: 'Personal Project',
-      period: 'Nov 2025 – JAN 2026',
+      period: 'Nov 2025 – Jan 2026',
       location: 'Melbourne, VIC',
-      description: 'A cross-platform mobile application designed to help health-conscious users compare local menu items by macro-nutrients and price points.',
-      bullets: [
-        'Designed and compiled a cross-platform mobile app using React Native and Expo.',
-        'Integrated a Supabase real-time backend to power secure user authentication, favorited items, and cross-device sync.',
-        'Created high-performance UI layouts and streamlined stack navigation to ensure frictionless user journeys.'
+      problem: 'Health-conscious diners lacked simple, unified ways to cross-examine restaurant meals by nutrient density and item price.',
+      whatIBuilt: [
+        'Compiled a cross-platform mobile application utilizing Expo and React Native.',
+        'Integrated Supabase BaaS to handle secure user authorization, macro profiles, and favorited menu sync.'
       ],
-      tech: ['React Native', 'Expo', 'Supabase', 'TypeScript', 'JavaScript (ES6+)'],
-      impact: '📱 Streamlined mobile navigation flows and optimized responsive component structures for a premium user experience.'
+      impact: '📱 Streamlined mobile navigation flows and optimized responsive component structures for a premium user experience.',
+      tech: ['React Native', 'Expo', 'Supabase', 'TypeScript', 'JavaScript (ES6+)']
     },
     {
       id: 'hope',
@@ -1034,15 +1158,14 @@ Try selecting one of these popular questions:
       role: 'Junior Full Stack Developer',
       period: 'Jul 2025 – Nov 2025',
       location: 'Melbourne, VIC',
-      description: 'Contributed to the development of the HOPE smart ring ecosystem across its marketing landing, central user dashboard, and companion mobile application.',
-      bullets: [
-        'Built responsive web interfaces illustrating AI distress detection systems and emergency SOS workflows.',
-        'Designed dashboard components that represent live biometric telemetry and real-time location coordinate mapping.',
-        'Implemented secure database tables and data flows with Supabase to manage IoT user metrics.',
-        'Collaborated closely with founders and UX designers in a lean team to rapidly test and iterate concepts.'
+      problem: 'Emerging biometric wearables lacked responsive developer interfaces and reliable coordinate sync for safety alerts.',
+      whatIBuilt: [
+        'Built responsive web dashboards mapping biometric health telemetry and live SOS triggers.',
+        'Engineered secure Supabase real-time database channels connecting mobile signals with supervisor maps.',
+        'Iterated MVP features rapidly under agile sprints alongside founders and UI designers.'
       ],
-      tech: ['React', 'React Native', 'Node.js', 'Supabase', 'JavaScript (ES6+)'],
-      impact: '💍 Successfully delivered MVP-ready screens and biometric tracking components ahead of the public product launch.'
+      impact: '💍 Successfully delivered MVP biometric dashboards and real-time mapping sync ahead of the public product launch.',
+      tech: ['React', 'React Native', 'Node.js', 'Supabase', 'JavaScript (ES6+)', 'WebSockets']
     },
     {
       id: 'rubicon',
@@ -1051,14 +1174,14 @@ Try selecting one of these popular questions:
       role: 'Software Tester (Embedded Systems)',
       period: 'Mar 2025 – Oct 2025',
       location: 'Shepparton, VIC',
-      description: 'Executed functional and regression tests on automated embedded irrigation controllers to guarantee flawless operations under tough environmental conditions.',
-      bullets: [
-        'Formulated rigorous test plans and executed testing cycles on embedded hardware controllers.',
-        'Logged defects and regression results in detail, minimizing debugging cycles for hardware engineers.',
-        'Managed inventory movements, component tracking, and material logistics processes utilizing SAP ERP.'
+      problem: 'Automated embedded irrigation systems require absolute operational stability in extreme farming fields, and material logs had latency.',
+      whatIBuilt: [
+        'Formulated rigorous hardware testing matrices and performed systematic regression tests on irrigation gate controllers.',
+        'Logged software defect discrepancies to minimize firmware debugging cycles for hardware engineers.',
+        'Coordinated material logistics, shipping entries, and parts tracking systems using SAP ERP.'
       ],
-      tech: ['SAP ERP', 'Embedded Systems Testing', 'QA Processes', 'Agile/Scrum'],
-      impact: '⚙️ Identified critical firmware discrepancies prior to deployment, ensuring stable agricultural field performance.'
+      impact: '⚙️ Identified critical firmware discrepancies prior to field deployment, ensuring stable agricultural performance.',
+      tech: ['SAP ERP', 'Embedded Systems Testing', 'QA Processes', 'Agile/Scrum', 'Hardware Testing']
     }
   ];
 
@@ -1222,7 +1345,7 @@ Try selecting one of these popular questions:
                 with Full Stack & AI.
               </h1>
               <p className="hero-subtitle">
-                I combine robust software engineering with real-world logistics and operational experience. From launching live production systems (SPC Roster App) to building high-performance local RAG engines (WorkFlow AI), I deliver practical, high-impact applications.
+                <strong>I build production-grade AI and full-stack systems for real operations problems.</strong> I combine robust software engineering with real-world logistics and operational experience. From launching live production systems (SPC Roster App) to building high-performance local RAG engines (WorkFlow AI), I deliver practical, high-impact applications.
               </p>
 
               <div className="hero-badges-row">
@@ -1242,6 +1365,22 @@ Try selecting one of these popular questions:
                   <span>Get in Touch</span>
                 </a>
               </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 600, letterSpacing: '0.05em' }}>DIRECT REACHOUT:</span>
+                <a href="https://linkedin.com/in/qleeq" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center' }} className="hover-text-cyan">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                </a>
+                <a href="https://github.com/Q-Leee" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center' }} className="hover-text-cyan">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                </a>
+                <button onClick={handleCopyEmail} style={{ color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', padding: 0 }} className="hover-text-cyan">
+                  <Mail size={16} />
+                  <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', marginLeft: '0.35rem', textDecoration: 'underline' }}>
+                    {copiedEmail ? 'Copied!' : 'hyungkyu.lee.q@gmail.com'}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* Right Column: Q-AI Interactive Chatbot & RAG Dashboard Pane */}
@@ -1254,14 +1393,14 @@ Try selecting one of these popular questions:
                   onClick={() => setActiveTab('chat')}
                 >
                   <Send size={14} />
-                  <span>💬 Chatbot</span>
+                  <span>💬 Sandbox Q&A</span>
                 </button>
                 <button
                   className={`dashboard-tab ${activeTab === 'rag' ? 'active' : ''}`}
                   onClick={() => setActiveTab('rag')}
                 >
                   <Cpu size={14} />
-                  <span>🧠 RAG Pipeline</span>
+                  <span>🧠 RAG Trace Panel</span>
                 </button>
               </div>
 
@@ -1271,7 +1410,7 @@ Try selecting one of these popular questions:
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Activity size={16} className="text-cyan-400 animate-pulse" />
                     <div>
-                      <span className="rag-panel-title">Q-RAG-v1.2 Telemetry</span>
+                      <span className="rag-panel-title">Live RAG Pipeline Trace</span>
                       {activeQuery && (
                         <div style={{ fontSize: '0.65rem', color: 'var(--color-cyan)', marginTop: '0.1rem', fontFamily: 'var(--font-mono)' }}>
                           Query: "{activeQuery}"
@@ -1411,12 +1550,12 @@ Try selecting one of these popular questions:
               <div className={`chatbot-panel ${activeTab === 'chat' ? 'mobile-visible' : 'mobile-hidden'}`}>
                 <div className="chatbot-header">
                   <div className="chatbot-user-info">
-                    <div className="chatbot-avatar">Q</div>
+                    <div className="chatbot-avatar" style={{ background: 'linear-gradient(135deg, var(--color-cyan), #a855f7)' }}>W</div>
                     <div className="chatbot-meta">
-                      <span className="chatbot-name">Q-AI Assistant</span>
+                      <span className="chatbot-name">WorkFlow AI Live Sandbox</span>
                       <span className="chatbot-status">
                         <span className="chatbot-status-dot"></span>
-                        Online
+                        Active RAG Node
                       </span>
                     </div>
                   </div>
@@ -1540,7 +1679,7 @@ Try selecting one of these popular questions:
               </div>
               <h3 className="threat-title">Advanced AI & RAG Orchestration</h3>
               <p className="threat-desc">
-                Possesses a Bachelor\'s degree in Software Engineering (AI). Q builds sophisticated RAG systems incorporating local LLMs (Ollama), vector stores (Chroma DB), hybrid retrieval (Dense + Sparse BM25 RRF), reranking layers, and hallucinations controls.
+                Bachelor of Software Engineering (AI) with hands-on experience in RAG, local LLM inference, and full-stack delivery.
               </p>
             </div>
 
@@ -1558,31 +1697,37 @@ Try selecting one of these popular questions:
         </div>
       </section>
 
+      
+
       {/* Interactive Projects Section */}
       <section id="projects">
         <div className="max-width-container">
           <div className="section-header">
             <span className="section-pretitle">Interactive Portfolio Showcase</span>
-            <h2 className="section-title">Core Projects Archive</h2>
+            <h2 className="section-title">Core Production & AI Systems</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '600px', marginTop: '0.5rem' }}>
-              Select any tech tag in the **Skills Matrix** below to automatically highlight the corresponding project cards using that technology!
+              These featured projects represent robust, production-grade applications addressing operational challenges, RAG pipeline engineering, and agentic workflows.
             </p>
           </div>
 
-          <div className="project-grid">
-            {projects.map(proj => {
-              // Highlight code check
+          {/* FEATURED PROJECTS: SPC App, WorkFlow AI, Harness */}
+          <div style={{ fontSize: '0.9rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600, marginBottom: '1.5rem', letterSpacing: '0.05em' }}>
+            ⚡ FEATURED CORE SYSTEMS
+          </div>
+          <div className="project-grid" style={{ marginBottom: '4rem' }}>
+            {projects.filter(p => ['spc', 'workflow', 'harness'].includes(p.id)).map(proj => {
               const isProjHighlighted = selectedSkill ? proj.tech.includes(selectedSkill) : false;
 
               return (
                 <div
                   key={proj.id}
                   className={`project-card glass glass-interactive ${isProjHighlighted ? 'highlighted' : ''} ${proj.isCurrentJob ? 'current-job' : ''}`}
+                  style={{ minHeight: '480px' }}
                 >
-                  <div className="project-body">
+                  <div className="project-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '2.2rem', height: '100%' }}>
                     <div className="project-header-row">
                       <div>
-                        <h3 className="project-title">{proj.title}</h3>
+                        <h3 className="project-title" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{proj.title}</h3>
                         <div style={{ color: 'var(--color-cyan)', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span>{proj.role}</span>
                           {proj.isCurrentJob && (
@@ -1590,58 +1735,444 @@ Try selecting one of these popular questions:
                           )}
                         </div>
                       </div>
-                      <span className="project-period">{proj.period}</span>
+                      <span className="project-period" style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{proj.period}</span>
                     </div>
 
-                    <p className="project-description">{proj.description}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', margin: '0.4rem 0' }}>
+                      <div>
+                        <span style={{ color: 'var(--color-cyan)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem', fontFamily: 'var(--font-mono)' }}>PROBLEM:</span>
+                        <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{proj.problem}</p>
+                      </div>
 
-                    <ul className="project-bullets">
-                      {proj.bullets.map((bullet, idx) => (
-                        <li key={idx}>{bullet}</li>
-                      ))}
-                    </ul>
+                      <div>
+                        <span style={{ color: 'var(--color-indigo)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem', fontFamily: 'var(--font-mono)' }}>WHAT I ENGINEERED:</span>
+                        <ul className="project-bullets" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          {proj.whatIBuilt.map((bullet, idx) => (
+                            <li key={idx} style={{ position: 'relative', paddingLeft: '1.1rem' }}>
+                              <span style={{ position: 'absolute', left: 0, color: 'var(--color-cyan)' }}>✦</span>
+                              {bullet}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
 
-                    <div className="project-tags">
+                    <div className="project-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: 'auto' }}>
                       {proj.tech.map((t, idx) => (
                         <span
                           key={idx}
                           className={`project-tag ${t === selectedSkill ? 'active' : ''}`}
+                          style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem' }}
                         >
                           {t}
                         </span>
                       ))}
                     </div>
 
-                    {/* ONLY FOR HARNESS PROJECT: ADD DYNAMIC RUN SIMULATOR BUTTON */}
-                    {proj.id === 'harness' && (
-                      <div style={{ marginTop: '1.2rem', marginBottom: '0.2rem' }}>
-                        <button
-                          className="btn-primary"
-                          style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.8rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem'
-                          }}
-                          onClick={() => setHarnessModalOpen(true)}
-                        >
-                          <Terminal size={14} />
-                          <span>Try Live Harness Simulator</span>
+                    {/* Action Links Bar */}
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                      {proj.githubUrl && proj.githubUrl !== 'private-repo' ? (
+                        <a href={proj.githubUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.78rem', gap: '0.3rem', borderRadius: '8px' }}>
+                          <span>GitHub Repo</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      ) : proj.githubUrl === 'private-repo' ? (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <span>🔒 Private Repo</span>
+                        </span>
+                      ) : null}
+
+                      {proj.liveDemoUrl && proj.liveDemoUrl === 'open-harness-modal' ? (
+                        <button onClick={() => setHarnessModalOpen(true)} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.78rem', gap: '0.3rem', borderRadius: '8px' }}>
+                          <Play size={12} />
+                          <span>Harness Demo</span>
                         </button>
-                      </div>
-                    )}
+                      ) : proj.liveDemoUrl && proj.liveDemoUrl === 'internal-access-only' ? (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-cyan)', background: 'rgba(57, 255, 20, 0.05)', padding: '0.4rem 1rem', borderRadius: '8px', border: '1px solid rgba(57, 255, 20, 0.2)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <span>🔒 Internal Tool</span>
+                        </span>
+                      ) : proj.liveDemoUrl && proj.liveDemoUrl.startsWith('#') ? (
+                        <a href={proj.liveDemoUrl} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.78rem', gap: '0.3rem', borderRadius: '8px' }}>
+                          <span>RAG Live Demo</span>
+                          <Play size={12} />
+                        </a>
+                      ) : proj.liveDemoUrl ? (
+                        <a href={proj.liveDemoUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.78rem', gap: '0.3rem', borderRadius: '8px' }}>
+                          <span>Live Demo</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
 
                   {proj.impact && (
-                    <div className="project-impact-banner">
-                      <Sparkles size={14} />
+                    <div className="project-impact-banner" style={{ padding: '0.8rem 1.5rem', background: 'rgba(16, 185, 129, 0.05)', borderTop: '1px solid rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--color-emerald)', fontWeight: 600 }}>
+                      <Sparkles size={14} style={{ flexShrink: 0 }} />
                       <span>{proj.impact}</span>
                     </div>
                   )}
                 </div>
               );
             })}
+          </div>
+
+          {/* SUPPORTING ARCHIVE PROJECTS: Menu Scout, Hope, Rubicon */}
+          <div style={{ fontSize: '0.9rem', color: 'var(--color-indigo)', fontFamily: 'var(--font-mono)', fontWeight: 600, marginBottom: '1.5rem', letterSpacing: '0.05em', borderTop: '1px dashed var(--border-color)', paddingTop: '3rem' }}>
+            📁 SUPPORTING SYSTEMS ARCHIVE & QA
+          </div>
+          <div className="project-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+            {projects.filter(p => !['spc', 'workflow', 'harness'].includes(p.id)).map(proj => {
+              const isProjHighlighted = selectedSkill ? proj.tech.includes(selectedSkill) : false;
+
+              return (
+                <div
+                  key={proj.id}
+                  className={`project-card glass glass-interactive ${isProjHighlighted ? 'highlighted' : ''}`}
+                  style={{ minHeight: '380px' }}
+                >
+                  <div className="project-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.8rem', height: '100%' }}>
+                    <div className="project-header-row">
+                      <div>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>{proj.title}</h4>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem', display: 'block', marginTop: '0.15rem' }}>{proj.role}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: '0.2rem 0' }}>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.45' }}>{proj.problem}</p>
+                      <ul style={{ fontSize: '0.8rem', color: 'var(--text-muted)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                        {proj.whatIBuilt.map((bullet, idx) => (
+                          <li key={idx} style={{ position: 'relative', paddingLeft: '1rem' }}>
+                            <span style={{ position: 'absolute', left: 0, color: 'var(--color-indigo)' }}>•</span>
+                            {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="project-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: 'auto' }}>
+                      {proj.tech.map((t, idx) => (
+                        <span
+                          key={idx}
+                          className={`project-tag ${t === selectedSkill ? 'active' : ''}`}
+                          style={{ fontSize: '0.62rem', padding: '0.1rem 0.4rem' }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Action Links Bar */}
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem', flexWrap: 'wrap' }}>
+                      {proj.githubUrl && (
+                        <a href={proj.githubUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: '0.35rem 0.8rem', fontSize: '0.72rem', gap: '0.2rem', borderRadius: '6px' }}>
+                          <span>GitHub</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
+                      {proj.liveDemoUrl && (
+                        <a href={proj.liveDemoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: '0.35rem 0.8rem', fontSize: '0.72rem', gap: '0.2rem', borderRadius: '6px', borderColor: 'rgba(99, 102, 241, 0.4)' }}>
+                          <span>Reference</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* New Section: System Architecture Snapshots */}
+      <section id="architecture" className="glass" style={{ borderLeft: 'none', borderRight: 'none', background: 'rgba(3, 7, 18, 0.5)', padding: '5rem 0' }}>
+        <div className="max-width-container">
+          <div className="section-header">
+            <span className="section-pretitle">Architecture Insights</span>
+            <h2 className="section-title">System Architecture Snapshots</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '650px', marginTop: '0.5rem', textAlign: 'center' }}>
+              Explore the data sync patterns, hybrid retrieval networks, and failover guardrails engineered behind Q's primary featured applications.
+            </p>
+          </div>
+
+          <div className="architecture-dashboard glass" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+            {/* Dashboard Headers */}
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.01)', overflowX: 'auto' }}>
+              <button
+                onClick={() => setActiveArchTab('spc')}
+                style={{
+                  padding: '1.25rem 2rem',
+                  fontSize: '0.85rem',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  borderRight: '1px solid var(--border-color)',
+                  color: activeArchTab === 'spc' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  borderBottom: activeArchTab === 'spc' ? '2px solid var(--color-cyan)' : 'none',
+                  background: activeArchTab === 'spc' ? 'rgba(3, 7, 18, 0.4)' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>01.</span>
+                <span>SPC Roster Sync Flow</span>
+              </button>
+              <button
+                onClick={() => setActiveArchTab('rag')}
+                style={{
+                  padding: '1.25rem 2rem',
+                  fontSize: '0.85rem',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  borderRight: '1px solid var(--border-color)',
+                  color: activeArchTab === 'rag' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  borderBottom: activeArchTab === 'rag' ? '2px solid var(--color-cyan)' : 'none',
+                  background: activeArchTab === 'rag' ? 'rgba(3, 7, 18, 0.4)' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>02.</span>
+                <span>WorkFlow RAG Pipeline</span>
+              </button>
+              <button
+                onClick={() => setActiveArchTab('harness')}
+                style={{
+                  padding: '1.25rem 2rem',
+                  fontSize: '0.85rem',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  color: activeArchTab === 'harness' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  borderBottom: activeArchTab === 'harness' ? '2px solid var(--color-cyan)' : 'none',
+                  background: activeArchTab === 'harness' ? 'rgba(3, 7, 18, 0.4)' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>03.</span>
+                <span>Agent Self-Healing Loop</span>
+              </button>
+            </div>
+
+            {/* Dashboard Content */}
+            <div style={{ padding: '2.5rem', background: 'rgba(3, 7, 18, 0.25)' }}>
+              {activeArchTab === 'spc' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2.5rem', alignItems: 'center' }}>
+                  {/* Left Column: Flowchart Nodes */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--color-cyan)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Data Sync Architecture</div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>Google Sheets Live Proxy & Edge Caching</h3>
+                    
+                    {/* Visual Node Diagram */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', background: 'rgba(3, 7, 18, 0.5)', padding: '1.5rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ border: '1px solid var(--color-cyan)', background: 'rgba(57, 255, 20, 0.05)', padding: '0.5rem 1rem', borderRadius: '6px', color: 'var(--color-cyan)', minWidth: '180px', textAlign: 'center' }}>
+                          Supervisor SPA Client
+                        </div>
+                        <div style={{ color: 'var(--text-muted)' }}>──(Google OAuth)──&gt;</div>
+                        <div style={{ border: '1px solid #fff', padding: '0.5rem 1rem', borderRadius: '6px', color: '#fff', minWidth: '180px', textAlign: 'center' }}>
+                          FastAPI Proxy Server
+                        </div>
+                      </div>
+                      
+                      <div style={{ paddingLeft: '90px', color: 'var(--color-indigo)', fontSize: '1.2rem', lineHeight: '0.5', margin: '-0.3rem 0' }}>│</div>
+                      
+                      <div style={{ display: 'flex', paddingLeft: '40px', gap: '2.2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <div style={{ color: 'var(--color-indigo)', fontSize: '0.7rem' }}>[CACHE LAYER]</div>
+                          <div style={{ border: '1px solid var(--color-indigo)', background: 'rgba(99, 102, 241, 0.05)', padding: '0.5rem 1rem', borderRadius: '6px', color: 'var(--color-indigo)', minWidth: '180px', textAlign: 'center', marginTop: '0.2rem' }}>
+                            Google Sheets REST API
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <div style={{ color: 'var(--color-emerald)', fontSize: '0.7rem' }}>[PERSISTENT AUDIT]</div>
+                          <div style={{ border: '1px solid var(--color-emerald)', background: 'rgba(16, 185, 129, 0.05)', padding: '0.5rem 1rem', borderRadius: '6px', color: 'var(--color-emerald)', minWidth: '180px', textAlign: 'center', marginTop: '0.2rem' }}>
+                            Turso Edge Database
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Architectural Explanation */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '2.5rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 600 }}>Key Architectural Choices</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Legacy Caching:</strong> Rather than forcing warehouse planners to completely abandon spreadsheets, Google Sheets acts as a reactive live cache database via dynamic REST routing.
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Audit Trails:</strong> Roster revisions and security handshakes are piped downstream to Turso (SQLite edge replica) to track supervisor activities without slowing browser responses.
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Low-Latency Display:</strong> Optimized public routes proxy cached sheets records straight to warehouse wall boards with zero database read constraints.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeArchTab === 'rag' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2.5rem', alignItems: 'center' }}>
+                  {/* Left Column: Flowchart Nodes */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--color-cyan)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Advanced Retrieval Flow</div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>Two-Stage Hybrid RAG & Cross-Encoder Rerank</h3>
+                    
+                    {/* Visual Node Diagram */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', background: 'rgba(3, 7, 18, 0.5)', padding: '1.2rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                      <div style={{ border: '1px solid var(--color-cyan)', padding: '0.4rem', borderRadius: '4px', textAlign: 'center', color: 'var(--color-cyan)' }}>
+                        User Query (Question)
+                      </div>
+                      <div style={{ textTransform: 'uppercase', fontSize: '0.62rem', color: 'var(--text-muted)', textAlign: 'center' }}>Project to 8D Vector & Tokenize</div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div style={{ border: '1px solid var(--color-indigo)', background: 'rgba(99, 102, 241, 0.05)', padding: '0.4rem', borderRadius: '4px', textAlign: 'center', color: 'var(--color-indigo)' }}>
+                          ChromaDB (Dense Cosine)
+                        </div>
+                        <div style={{ border: '1px solid var(--color-purple)', background: 'rgba(168, 85, 247, 0.05)', padding: '0.4rem', borderRadius: '4px', textAlign: 'center', color: 'var(--color-purple)' }}>
+                          BM25 Dictionary (Sparse)
+                        </div>
+                      </div>
+                      
+                      <div style={{ textTransform: 'uppercase', fontSize: '0.62rem', color: 'var(--text-muted)', textAlign: 'center' }}>Reciprocal Rank Fusion (RRF)</div>
+                      <div style={{ border: '1px solid var(--color-emerald)', background: 'rgba(16, 185, 129, 0.05)', padding: '0.4rem', borderRadius: '4px', textAlign: 'center', color: 'var(--color-emerald)' }}>
+                        Cross-Encoder Reranking
+                      </div>
+                      
+                      <div style={{ textTransform: 'uppercase', fontSize: '0.62rem', color: 'var(--text-muted)', textAlign: 'center' }}>Hallucination & Citation Guard</div>
+                      <div style={{ border: '1px solid #fff', padding: '0.4rem', borderRadius: '4px', textAlign: 'center', color: '#fff' }}>
+                        Source-Cited LLM Generation (Local Ollama)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Architectural Explanation */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '2.5rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 600 }}>Key Architectural Choices</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Hybrid Retrieval:</strong> Merging dense embeddings (capturing deep semantic concepts) with sparse BM25 (retaining exact keywords like visa subclasses or stack names) via Reciprocal Rank Fusion.
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Cross-Encoder Reranker:</strong> A neural scoring model computes the exact similarity between query-document pairs, eliminating weaker matches.
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Hallucination Guardrails:</strong> Two-stage system templates enforce strict context-only responses, requiring structured citations before text generation.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeArchTab === 'harness' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2.5rem', alignItems: 'center' }}>
+                  {/* Left Column: Flowchart Nodes */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--color-cyan)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Agentic Error feedback loop</div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>Recursive Self-Correction & API Failovers</h3>
+                    
+                    {/* Visual Node Diagram */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', background: 'rgba(3, 7, 18, 0.5)', padding: '1.5rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ border: '1px solid rgba(255,255,255,0.2)', padding: '0.4rem 0.8rem', borderRadius: '4px', minWidth: '150px', textAlign: 'center' }}>
+                          Primary: Gemini Cloud
+                        </div>
+                        <div style={{ color: 'var(--color-purple)', fontSize: '0.7rem' }}>[FALLBACK ON 429]</div>
+                        <div style={{ border: '1px solid var(--color-purple)', background: 'rgba(168, 85, 247, 0.05)', padding: '0.4rem 0.8rem', borderRadius: '4px', minWidth: '150px', textAlign: 'center', color: 'var(--color-purple)' }}>
+                          Local Ollama
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--text-muted)', margin: '-0.3rem 0' }}>↓</div>
+                      
+                      <div style={{ border: '1px solid var(--color-cyan)', background: 'rgba(57, 255, 20, 0.05)', padding: '0.5rem', borderRadius: '6px', color: 'var(--color-cyan)', textAlign: 'center' }}>
+                        TypeScript Sandbox (ts-node child-process runtime)
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ color: 'var(--color-emerald)', fontSize: '0.75rem' }}>✔ SUCCESS: Run Output</div>
+                        <div style={{ color: 'var(--color-cyan)' }}>&lt;───(Auto-Repair Loop)───&gt;</div>
+                        <div style={{ color: 'var(--color-cyan)', fontSize: '0.75rem' }}>✘ FAIL: Stderr stack</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Architectural Explanation */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '2.5rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 600 }}>Key Architectural Choices</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Hybrid Failover:</strong> To counter unstable remote APIs and rate boundaries, calls route locally to Ollama (`qwen2.5-coder`) if HTTP 429 blocks occur.
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Isolated Sandbox:</strong> Spawns timed child processes to isolate compile/runtime side-effects, capturing full stack stderr files without blocking the main event loops.
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                      • <strong>Recursive Healing:</strong> Standardizes strict error templates parsing output stack files, feeding precise syntax corrections directly back into LLM contexts until successful validation.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Architecture Insights bottom: Experiments Lab Card */}
+            <div className="glass" style={{
+              marginTop: '2.5rem',
+              borderRadius: '16px',
+              padding: '1.5rem 2rem',
+              border: '1px solid rgba(57, 255, 20, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '2rem',
+              flexWrap: 'wrap',
+              background: 'rgba(3, 7, 18, 0.3)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '280px' }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: 'rgba(57, 255, 20, 0.08)',
+                  border: '1px solid rgba(57, 255, 20, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--color-cyan)',
+                  flexShrink: 0
+                }}>
+                  <Cpu size={20} className="animate-pulse" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fff', margin: 0 }}>Experiments Lab</h4>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                    Optional interactive demos for vector similarity, semantic mapping, and AI interface experiments.
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setEmbeddingExpanded(true);
+                  addAgentLog('SYSTEM', 'Activated Neural Latent Space Vector Engine.');
+                }}
+                className="btn-primary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.65rem 1.25rem',
+                  fontSize: '0.82rem',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <Cpu size={14} />
+                <span>Open Experiments Lab</span>
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
@@ -1684,97 +2215,6 @@ Try selecting one of these popular questions:
         </div>
       </section>
 
-      {/* Interactive 2D Embedding Space Visualizer Section */}
-      <section id="embedding" style={{ background: 'rgba(3, 7, 18, 0.5)' }}>
-        <div className="max-width-container">
-          <div className="section-header">
-            <span className="section-pretitle">Neural Latent Space</span>
-            <h2 className="section-title">Project & Skill Embedding Space</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '650px', marginTop: '0.5rem' }}>
-              Interact with the neural vector map! Click any node or search to trigger real-time **Cosine Similarity** calculations. Watch similar concepts gravitate to the center connected by glowing neon semantic lasers.
-            </p>
-          </div>
-
-          <div className="embedding-container glass">
-            {/* Visualizer Canvas Block */}
-            <div className="canvas-wrapper">
-              <EmbeddingSpaceVisualizer
-                activeFocusId={activeEmbeddingFocus}
-                onNodeClick={(id) => {
-                  setActiveEmbeddingFocus(id);
-                  addAgentLog('SYSTEM', `Focal node shifted to embedding cell: '${id}'`);
-                }}
-              />
-            </div>
-
-            {/* Sidebar Details Panel */}
-            <div className="vector-details-panel">
-              <div className="panel-hud-header">
-                <Terminal size={14} style={{ color: 'var(--color-cyan)' }} />
-                <span className="panel-hud-title">Vector Engine Readout</span>
-              </div>
-
-              {activeEmbeddingFocus ? (
-                <div className="hud-readout-active">
-                  <div className="readout-group">
-                    <span className="readout-label">ACTIVE NODE</span>
-                    <span className="readout-value active-node-label">
-                      {activeEmbeddingFocus.toUpperCase()}
-                    </span>
-                  </div>
-
-                  <div className="readout-group">
-                    <span className="readout-label">LATENT SPACE COORDINATES</span>
-                    <span className="readout-value font-mono text-cyan">
-                      [{vectorData[activeEmbeddingFocus] ? vectorData[activeEmbeddingFocus].map(v => v.toFixed(3)).join(', ') : '0, 0, 0, 0'}]
-                    </span>
-                  </div>
-
-                  <div className="readout-group">
-                    <span className="readout-label">NEURAL MATRIX CONNECTIONS</span>
-                    <div className="connections-list font-mono">
-                      {Object.keys(vectorData)
-                        .filter(id => id !== activeEmbeddingFocus)
-                        .map(id => {
-                          const similarity = getCosineSimilarity(vectorData[activeEmbeddingFocus], vectorData[id]);
-                          return { id, similarity };
-                        })
-                        .filter(item => item.similarity > 0.65)
-                        .sort((a, b) => b.similarity - a.similarity)
-                        .slice(0, 5)
-                        .map(item => (
-                          <div key={item.id} className="connection-item">
-                            <span className="connect-name">→ {item.id}</span>
-                            <span className="connect-score">
-                              {(item.similarity * 100).toFixed(1)}% Similarity
-                            </span>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setActiveEmbeddingFocus(null);
-                      addAgentLog('SYSTEM', 'Cleared Latent Space vectors filter.');
-                    }}
-                    className="btn-secondary clear-focus-btn"
-                  >
-                    Reset Latent Space
-                  </button>
-                </div>
-              ) : (
-                <div className="hud-readout-idle font-mono text-muted">
-                  <span className="blink-text">_ Awaiting vector anchor...</span>
-                  <p style={{ fontSize: '0.78rem', marginTop: '1rem', lineHeight: '1.4' }}>
-                    Click any node floating inside the nebula or click a badge in the Skills Grid above to project its sparse multidimensional coordinate array.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Career & Growth Timeline Section */}
       <section id="timeline">
@@ -1816,9 +2256,62 @@ Try selecting one of these popular questions:
           <div className="section-header">
             <span className="section-pretitle">Get In Touch</span>
             <h2 className="section-title">Opportunities & Coffee Chats</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '600px', marginTop: '0.5rem' }}>
-              Q is open to full-time opportunities, interview requests, technical discussions, and corporate sponsorship chats.
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '600px', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
+              Open to full-time roles across software, full-stack, and AI engineering, including relocation and sponsorship pathways.
             </p>
+            
+            {/* Quick Outreach Social Bar */}
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <button
+                onClick={handleCopyEmail}
+                className="btn-primary"
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  fontSize: '0.82rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  boxShadow: 'none'
+                }}
+              >
+                <Mail size={14} />
+                <span>{copiedEmail ? '✅ Copied to Clipboard!' : 'Copy Email Address'}</span>
+              </button>
+              
+              <a
+                href="https://linkedin.com/in/qleeq"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  fontSize: '0.82rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                <span>LinkedIn Profile</span>
+              </a>
+
+              <a
+                href="https://github.com/Q-Leee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  fontSize: '0.82rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                <span>GitHub Repositories</span>
+              </a>
+            </div>
           </div>
 
           <div className="contact-grid">
@@ -1901,8 +2394,8 @@ Try selecting one of these popular questions:
             {/* Static Interactive Form */}
             <div className="contact-form-card glass">
               <h3 style={{ fontSize: '1.25rem' }}>Send a Message Instantly</h3>
-              <p style={{ color: 'var(--color-cyan)', fontWeight: '700', fontSize: '0.92rem', marginTop: '0.25rem', marginBottom: '0.75rem', textShadow: '0 0 10px rgba(57, 255, 20, 0.4)' }}>
-                Send me a job offer. I will personally review it and get back to you! 😉
+              <p style={{ color: 'var(--color-cyan)', fontWeight: '700', fontSize: '0.92rem', marginTop: '0.25rem', marginBottom: '0.75rem', textShadow: '0 0 10px rgba(57, 255, 20, 0.4)', lineHeight: '1.4' }}>
+                Hiring managers always ask candidates to “reach out” — so here’s your turn. Send me a job offer, and I’ll actually read it.
               </p>
 
               <form onSubmit={async (e) => {
@@ -1936,7 +2429,7 @@ Try selecting one of these popular questions:
                   if (response.ok && data.success) {
                     setModalContent({
                       title: 'TRANSMISSION SECURE',
-                      message: 'Your message has been successfully dispatched to Q\'s personal email!',
+                      message: 'Message received. I’ll review it personally and reply as soon as I can.',
                       subtext: 'I have logged this recruitment interaction. Q will personally review the details and respond to your return address shortly. Thank you!'
                     });
                     addAgentLog('SYSTEM', `Successfully emailed message from '${contactName}' to Q.`);
@@ -2015,15 +2508,21 @@ Try selecting one of these popular questions:
                   ></textarea>
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  style={{ alignSelf: 'flex-start', marginTop: '0.5rem', opacity: contactSending ? 0.7 : 1 }}
-                  disabled={contactSending}
-                >
-                  <Send size={16} className={contactSending ? "animate-pulse" : ""} />
-                  <span>{contactSending ? "Sending Securely..." : "Send Message"}</span>
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    style={{ alignSelf: 'flex-start', opacity: contactSending ? 0.7 : 1 }}
+                    disabled={contactSending}
+                  >
+                    <Send size={16} className={contactSending ? "animate-pulse" : ""} />
+                    <span>{contactSending ? "Sending Securely..." : "Send Message"}</span>
+                  </button>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.25rem' }}>
+                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-cyan)', boxShadow: '0 0 6px var(--color-cyan)' }}></span>
+                    This form is live and sends directly to my inbox via webhook
+                  </span>
+                </div>
 
               </form>
             </div>
@@ -2076,6 +2575,102 @@ Try selecting one of these popular questions:
         isOpen={harnessModalOpen}
         onClose={() => setHarnessModalOpen(false)}
       />
+      {/* Experiments Lab Modal (Neural Latent Vector Space) */}
+      {embeddingExpanded && (
+        <div className="custom-modal-overlay" style={{ zIndex: 1000 }} onClick={() => setEmbeddingExpanded(false)}>
+          <div className="custom-modal-card glass animate-fade-in" style={{ maxWidth: '1000px', width: '95%', height: '85vh', maxHeight: '650px', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-cyan)', boxShadow: '0 0 40px rgba(57, 255, 20, 0.15)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="custom-modal-header" style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Cpu size={18} style={{ color: 'var(--color-cyan)' }} className="animate-pulse" />
+                <h3 className="custom-modal-title" style={{ fontSize: '1.05rem', margin: 0 }}>EXPERIMENTS LAB: NEURAL LATENT SPACE</h3>
+              </div>
+              <button onClick={() => setEmbeddingExpanded(false)} style={{ color: 'var(--text-muted)', cursor: 'pointer' }} className="hover-text-cyan">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="embedding-container" style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.3fr 0.7fr', height: 'calc(100% - 56px)' }}>
+              {/* Visualizer Canvas Block */}
+              <div className="canvas-wrapper" style={{ height: '100%' }}>
+                <EmbeddingSpaceVisualizer
+                  activeFocusId={activeEmbeddingFocus}
+                  onNodeClick={(id) => {
+                    setActiveEmbeddingFocus(id);
+                    addAgentLog('SYSTEM', `Focal node shifted to embedding cell: '${id}'`);
+                  }}
+                />
+              </div>
+
+              {/* Sidebar Details Panel */}
+              <div className="vector-details-panel" style={{ height: '100%', overflowY: 'auto' }}>
+                <div className="panel-hud-header">
+                  <Terminal size={14} style={{ color: 'var(--color-cyan)' }} />
+                  <span className="panel-hud-title">Vector Engine Readout</span>
+                </div>
+
+                {activeEmbeddingFocus ? (
+                  <div className="hud-readout-active">
+                    <div className="readout-group">
+                      <span className="readout-label">ACTIVE NODE</span>
+                      <span className="readout-value active-node-label">
+                        {activeEmbeddingFocus.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="readout-group">
+                      <span className="readout-label">LATENT SPACE COORDINATES</span>
+                      <span className="readout-value font-mono text-cyan" style={{ fontSize: '0.72rem', wordBreak: 'break-all' }}>
+                        [{vectorData[activeEmbeddingFocus] ? vectorData[activeEmbeddingFocus].map(v => v.toFixed(3)).join(', ') : '0, 0, 0, 0'}]
+                      </span>
+                    </div>
+
+                    <div className="readout-group">
+                      <span className="readout-label">NEURAL MATRIX CONNECTIONS</span>
+                      <div className="connections-list font-mono">
+                        {Object.keys(vectorData)
+                          .filter(id => id !== activeEmbeddingFocus)
+                          .map(id => {
+                            const similarity = getCosineSimilarity(vectorData[activeEmbeddingFocus], vectorData[id]);
+                            return { id, similarity };
+                          })
+                          .filter(item => item.similarity > 0.65)
+                          .sort((a, b) => b.similarity - a.similarity)
+                          .slice(0, 4)
+                          .map(item => (
+                            <div key={item.id} className="connection-item">
+                              <span className="connect-name">→ {item.id}</span>
+                              <span className="connect-score">
+                                {(item.similarity * 100).toFixed(1)}% Sim
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setActiveEmbeddingFocus(null);
+                        addAgentLog('SYSTEM', 'Cleared Latent Space vectors filter.');
+                      }}
+                      className="btn-secondary clear-focus-btn"
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem' }}
+                    >
+                      Reset Latent Space
+                    </button>
+                  </div>
+                ) : (
+                  <div className="hud-readout-idle font-mono text-muted" style={{ padding: '1rem 0' }}>
+                    <span className="blink-text">_ Awaiting vector anchor...</span>
+                    <p style={{ fontSize: '0.74rem', marginTop: '0.75rem', lineHeight: '1.4' }}>
+                      Click any node floating inside the nebula or click a badge in the Skills Grid to project its sparse multidimensional coordinate array.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Collapsible Cyber Agent Telemetry HUD */}
       <div className={`agent-hud-container ${hudCollapsed ? 'collapsed' : ''}`}>
         {hudCollapsed ? (
@@ -2084,14 +2679,14 @@ Try selecting one of these popular questions:
             className="agent-hud-collapsed-trigger glass glass-interactive"
           >
             <Terminal size={14} style={{ color: 'var(--color-cyan)' }} className="animate-pulse" />
-            <span>● AGENT_HUD: ACTIVE</span>
+            <span>● SYSTEM_STATUS: ACTIVE</span>
           </button>
         ) : (
           <div className="agent-hud-panel glass">
             <div className="agent-hud-header">
               <div className="agent-hud-status">
                 <span className="agent-hud-dot"></span>
-                <span className="agent-hud-title">Q-AGENT TELEMETRY HUD</span>
+                <span className="agent-hud-title">AI SYSTEM STATUS PANEL</span>
               </div>
               <button
                 onClick={() => setHudCollapsed(true)}
@@ -2101,16 +2696,40 @@ Try selecting one of these popular questions:
               </button>
             </div>
 
-            <div ref={logsContainerRef} className="agent-hud-console">
-              {agentLogs.map(log => (
-                <div key={log.id} className="hud-log-line">
-                  <span className="hud-log-time">{log.timestamp}</span>
-                  <span className={`hud-log-cat cat-${log.category.toLowerCase()}`}>
-                    [{log.category}]
+            <div ref={logsContainerRef} className="agent-hud-console" style={{ padding: '0.5rem 0.75rem', gap: '0.2rem', display: 'flex', flexDirection: 'column' }}>
+              <div className="hud-status-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(255,255,255,0.05)', paddingBottom: '2px' }}>
+                <span className="hud-status-label" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600 }}>System State</span>
+                <span className="hud-status-value" style={{ color: telemetry.systemState.toLowerCase() === 'active' || telemetry.systemState.toLowerCase() === 'idle' ? 'var(--color-cyan)' : 'var(--color-purple)', fontSize: '0.65rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                  {telemetry.systemState}
+                </span>
+              </div>
+              <div className="hud-status-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(255,255,255,0.05)', paddingBottom: '2px' }}>
+                <span className="hud-status-label" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600 }}>Current Intent</span>
+                <span className="hud-status-value" style={{ color: '#ffffff', fontSize: '0.65rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{telemetry.currentIntent}</span>
+              </div>
+              <div className="hud-status-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(255,255,255,0.05)', paddingBottom: '2px' }}>
+                <span className="hud-status-label" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600 }}>Retrieval Mode</span>
+                <span className="hud-status-value" style={{ color: 'var(--color-indigo)', fontSize: '0.65rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{telemetry.retrievalMode}</span>
+              </div>
+              <div className="hud-status-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(255,255,255,0.05)', paddingBottom: '2px' }}>
+                <span className="hud-status-label" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600 }}>Top Signal</span>
+                <span className="hud-status-value" style={{ color: 'var(--color-emerald)', fontSize: '0.65rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{telemetry.topSignal}</span>
+              </div>
+              <div className="hud-status-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(255,255,255,0.05)', paddingBottom: '2px' }}>
+                <span className="hud-status-label" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600 }}>RAG Confidence</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span className="hud-status-value" style={{ color: 'var(--color-cyan)', fontSize: '0.65rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                    {(telemetry.confidence || 0).toFixed(2)}
                   </span>
-                  <span className="hud-log-text">{log.text}</span>
+                  <div style={{ width: '35px', height: '3.5px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${(telemetry.confidence || 0) * 100}%`, height: '100%', background: 'var(--color-cyan)', boxShadow: '0 0 6px var(--color-cyan)' }}></div>
+                  </div>
                 </div>
-              ))}
+              </div>
+              <div className="hud-status-row" style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '1px' }}>
+                <span className="hud-status-label" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600 }}>Focus Node</span>
+                <span className="hud-status-value" style={{ color: 'var(--color-purple)', fontSize: '0.65rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{telemetry.focusNode}</span>
+              </div>
             </div>
           </div>
         )}
