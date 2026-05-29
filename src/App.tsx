@@ -109,6 +109,7 @@ const vectorData: { [key: string]: number[] } = {
   // Web / Full-Stack / Projects
   'spc': [0.20, 0.95, 0.40, 0.30],
   'fastapi': [0.40, 0.90, 0.60, 0.50],
+  'python': [0.30, 0.93, 0.50, 0.38],
   'react': [0.10, 0.98, 0.30, 0.20],
   'typescript': [0.30, 0.92, 0.40, 0.30],
   'javascript': [0.20, 0.95, 0.30, 0.20],
@@ -1134,7 +1135,7 @@ Try selecting one of these popular questions:
       impact: '🦾 Reached 100% bug-free autonomous code output across 50+ experimental evaluations, handling 100% of 429 quota exceptions.',
       tech: ['TypeScript', 'Node.js', 'Vite', 'Gemini API', 'Ollama', 'ts-node', 'Child Processes', 'Failover Architecture', 'Guardrails'],
       liveDemoUrl: 'open-harness-modal',
-      githubUrl: 'https://github.com/Q-Leee/Agentic-Harness'
+      githubUrl: 'https://github.com/Q-Leee/self-healing-harness'
     },
     {
       id: 'menuscout',
@@ -2756,6 +2757,10 @@ function HarnessSimulatorModal({ isOpen, onClose }: HarnessModalProps) {
   const [status, setStatus] = useState<'idle' | 'running' | 'healed' | 'success'>('idle');
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
 
+  // v2.0 Configurations
+  const [language, setLanguage] = useState<'typescript' | 'python'>('typescript');
+  const [isolation, setIsolation] = useState<'local' | 'docker'>('local');
+
   useEffect(() => {
     if (terminalEndRef.current) {
       terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -2808,8 +2813,51 @@ export {};`,
       error: `TSError: ⨯ Unable to compile TypeScript:
 sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.
 sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`,
-      output: `Original: 'aabcccccaaa' -> Compressed: 'a2b1c5a3'
-Original: 'abcdef' -> Compressed: 'abcdef'`
+      output: `"aabcccccaaa" -> "a2b1c5a3"\n"abcdef" -> "abcdef"`,
+      
+      initialPy: `def compress_string(s: str) -> str:
+    if not s:
+        return ""
+    comp = []
+    char = s[0]
+    count = 0
+    for c in s:
+        if c == char:
+            count += 1
+        else:
+            comp.append(char + str(count))
+            char = c
+            count = 1
+    comp.append(char + str(count))
+    res = "".join(comp)
+    return s if len(res) >= len(s) else res
+
+print(compress_string("aabcccccaaa"))`,
+      healedPy: `# Healed attempt: Resolved incorrect import exception
+def compress_string(s: str) -> str:
+    if not s:
+        return ""
+    comp = []
+    char = s[0]
+    count = 0
+    for c in s:
+        if c == char:
+            count += 1
+        else:
+            comp.append(char + str(count))
+            char = c
+            count = 1
+    comp.append(char + str(count))
+    res = "".join(comp)
+    return s if len(res) >= len(s) else res
+
+print(f'"aabcccccaaa" -> "{compress_string("aabcccccaaa")}"')
+print(f'"abcdef" -> "{compress_string("abcdef")}"')`,
+      errorPy: `Traceback (most recent call last):
+  File "sandbox_run.py", line 1, in <module>
+    import non_existent_helper_module
+ModuleNotFoundError: No module named 'non_existent_helper_module'`,
+      outputPy: `"aabcccccaaa" -> "a2b1c5a3"\n"abcdef" -> "abcdef"`
     },
     business: {
       title: 'Business Days Calculator',
@@ -2842,8 +2890,43 @@ console.log("Calculated Business Days: " + getBusinessDays(start, end) + " days"
 export {};`,
       error: `TSError: ⨯ Unable to compile TypeScript:
 sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.`,
-      output: `Start: 2026-05-01 -> End: 2026-05-10
-Calculated Business Days: 6 days`
+      output: `Start: 2026-05-01 -> End: 2026-05-10\nCalculated Business Days: 6 days`,
+
+      initialPy: `from datetime import datetime, timedelta
+
+def get_business_days(start_str: str, end_str: str) -> int:
+    start = datetime.strptime(start_str, "%Y-%m-%d")
+    end = datetime.strptime(end_str, "%Y-%m-%d")
+    count = 0
+    cur = start
+    while cur <= end:
+        if cur.weekday() < 5:  # Monday to Friday
+            count += 1
+        cur += timedelta(days=1)
+    return count
+
+print(get_business_days("2026-05-01", "2026-05-10"))`,
+      healedPy: `# Healed attempt: Resolved incorrect import exception
+from datetime import datetime, timedelta
+
+def get_business_days(start_str: str, end_str: str) -> int:
+    start = datetime.strptime(start_str, "%Y-%m-%d")
+    end = datetime.strptime(end_str, "%Y-%m-%d")
+    count = 0
+    cur = start
+    while cur <= end:
+        if cur.weekday() < 5:
+            count += 1
+        cur += timedelta(days=1)
+    return count
+
+print("Start: 2026-05-01 -> End: 2026-05-10")
+print(f"Calculated Business Days: {get_business_days('2026-05-01', '2026-05-10')} days")`,
+      errorPy: `Traceback (most recent call last):
+  File "sandbox_run.py", line 1, in <module>
+    import non_existent_helper_module
+ModuleNotFoundError: No module named 'non_existent_helper_module'`,
+      outputPy: `Start: 2026-05-01 -> End: 2026-05-10\nCalculated Business Days: 6 days`
     },
     math: {
       title: 'Prime Factorization',
@@ -2878,20 +2961,57 @@ console.log("1000 Prime Factors: ", Array.from(primeFactors(1000).entries()));
 export {};`,
       error: `TSError: ⨯ Unable to compile TypeScript:
 sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.`,
-      output: `12 Prime Factors:  [ [ 2, 2 ], [ 3, 1 ] ]
-1000 Prime Factors:  [ [ 2, 3 ], [ 5, 3 ] ]`
+      output: `12 Prime Factors:  [ [ 2, 2 ], [ 3, 1 ] ]\n1000 Prime Factors:  [ [ 2, 3 ], [ 5, 3 ] ]`,
+
+      initialPy: `def prime_factors(n: int) -> dict:
+    factors = {}
+    d = 2
+    while d * d <= n:
+        count = 0
+        while n % d == 0:
+            count += 1
+            n //= d
+        if count > 0:
+            factors[d] = count
+        d += 1
+    if n > 1:
+        factors[n] = 1
+    return factors
+
+print(prime_factors(12))`,
+      healedPy: `# Healed attempt: Resolved incorrect import exception
+def prime_factors(n: int) -> dict:
+    factors = {}
+    d = 2
+    while d * d <= n:
+        count = 0
+        while n % d == 0:
+            count += 1
+            n //= d
+        if count > 0:
+            factors[d] = count
+        d += 1
+    if n > 1:
+        factors[n] = 1
+    return factors
+
+print(f"Prime factors of 12: {prime_factors(12)}")
+print(f"Prime factors of 1000: {prime_factors(1000)}")`,
+      errorPy: `Traceback (most recent call last):
+  File "sandbox_run.py", line 1, in <module>
+    import non_existent_helper_module
+ModuleNotFoundError: No module named 'non_existent_helper_module'`,
+      outputPy: `Prime factors of 12: {2: 2, 3: 1}\nPrime factors of 1000: {2: 3, 5: 3}`
     }
   };
 
   /**
-   * Generates highly authentic, custom-concept TypeScript code on the fly
-   * based on visitor input keywords to simulate a fully dynamic coding agent.
+   * Generates highly authentic, custom-concept TS/Python code on the fly
    */
   const generateDynamicTask = (promptText: string) => {
     const cleanPrompt = promptText.replace(/[^a-zA-Z0-9\s]/g, '').trim();
     const words = cleanPrompt.split(/\s+/).filter(w => w.length > 0);
 
-    // Core concept extractor
     let concept = "CustomUtility";
     if (words.length > 0) {
       const sliceWords = words.slice(0, 3).filter(w => !['write', 'create', 'a', 'an', 'the', 'program', 'function', 'class'].includes(w.toLowerCase()));
@@ -2906,172 +3026,75 @@ sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its cor
     concept = concept.replace(/[^a-zA-Z0-9]/g, '');
     if (!/^[A-Z]/.test(concept)) concept = 'My' + concept;
 
-    const lowerPrompt = cleanPrompt.toLowerCase();
-    let classProperties = `  private name: string;
-  private active: boolean;`;
-    let classConstructor = `  constructor(name: string) {
+    // TypeScript Dynamic Generation
+    const initialTs = `class ${concept} {
+  private name: string;
+  constructor(name: string) {
     this.name = name;
-    this.active = true;
-  }`;
-    let classMethod = `  public executeTask(): void {
-    console.log(\`[${concept}] Executing custom request: '${cleanPrompt}'\`);
-  }`;
-    let instantiation = `const myInstance = new ${concept}("Harness Demo");
-myInstance.executeTask();`;
-    let runLogs = `[${concept}] Executing custom request: '${cleanPrompt}'\nStatus: Active and verified by Harness Sandbox.`;
-
-    if (/\b(calc|math|add|sum|multiply|subtract|calculator|calculation)\b/i.test(lowerPrompt) || /[\+\-\*\/]/.test(lowerPrompt)) {
-      const rangeMatch = lowerPrompt.match(/(?:sum|add)\s*(?:of\s*)?(\d+)\s*(?:to|and|-)\s*(\d+)/i);
-      if (rangeMatch) {
-        const start = parseInt(rangeMatch[1]);
-        const end = parseInt(rangeMatch[2]);
-        let actualSum = 0;
-        for (let i = start; i <= end; i++) actualSum += i;
-
-        classProperties = `  private start: number;
-  private end: number;`;
-        classConstructor = `  constructor(start: number, end: number) {
-    this.start = start;
-    this.end = end;
-  }`;
-        classMethod = `  public calculateSum(): number {
-    let sum = 0;
-    for (let i = this.start; i <= this.end; i++) {
-      sum += i;
-    }
-    return sum;
-  }`;
-        instantiation = `const calc = new ${concept}(${start}, ${end});
-console.log("Sum from ${start} to ${end} = " + calc.calculateSum());`;
-        runLogs = `Sum from ${start} to ${end} = ${actualSum}`;
-      } else {
-        const numberMatches = lowerPrompt.match(/\d+/g);
-        if (numberMatches && numberMatches.length >= 2) {
-          const num1 = parseInt(numberMatches[0]);
-          const num2 = parseInt(numberMatches[1]);
-          let op = "add";
-          let opSymbol = "+";
-          let result = num1 + num2;
-
-          if (lowerPrompt.includes('multiply') || lowerPrompt.includes('*')) {
-            op = "multiply";
-            opSymbol = "*";
-            result = num1 * num2;
-          } else if (lowerPrompt.includes('subtract') || lowerPrompt.includes('minus') || lowerPrompt.includes('-')) {
-            op = "subtract";
-            opSymbol = "-";
-            result = num1 - num2;
-          }
-
-          classProperties = `  private lastValue: number = 0;`;
-          classConstructor = `  constructor() {
-    this.lastValue = 0;
-  }`;
-          classMethod = `  public ${op}(a: number, b: number): number {
-    this.lastValue = a ${opSymbol} b;
-    return this.lastValue;
-  }`;
-          instantiation = `const calc = new ${concept}();
-console.log("Result of ${num1} ${opSymbol} ${num2} = " + calc.${op}(${num1}, ${num2}));`;
-          runLogs = `Result of ${num1} ${opSymbol} ${num2} = ${result}`;
-        } else {
-          classProperties = `  private lastCalculated: number = 0;`;
-          classConstructor = `  constructor() {
-    this.lastCalculated = 0;
-  }`;
-          classMethod = `  public add(a: number, b: number): number {
-    this.lastCalculated = a + b;
-    return this.lastCalculated;
   }
-  public multiply(a: number, b: number): number {
-    this.lastCalculated = a * b;
-    return this.lastCalculated;
-  }`;
-          instantiation = `const calc = new ${concept}();
-console.log("Calculated 15 + 27 = " + calc.add(15, 27));
-console.log("Calculated 8 * 9 = " + calc.multiply(8, 9));`;
-          runLogs = `Calculated 15 + 27 = 42
-Calculated 8 * 9 = 72`;
-        }
-      }
-    } else if (/\b(users?|profiles?|members?|auth|login|signup|signin|credentials)\b/i.test(lowerPrompt)) {
-      classProperties = `  private username: string;
-  private email: string;
-  private role: string;`;
-      classConstructor = `  constructor(username: string, email: string) {
-    this.username = username;
-    this.email = email;
-    this.role = 'user';
-  }`;
-      classMethod = `  public getInfo(): string {
-    return "User: " + this.username + " | Email: " + this.email + " | Role: " + this.role;
+  public runTask(): void {
+    console.log("[${concept}] Custom request: '${cleanPrompt}'");
   }
-  public promoteToAdmin(): void {
-    this.role = 'admin';
-  }`;
-      instantiation = `const user = new ${concept}("john_doe", "john@example.com");
-console.log("Initial state: " + user.getInfo());
-user.promoteToAdmin();
-console.log("Updated state: " + user.getInfo());`;
-      runLogs = `Initial state: User: john_doe | Email: john@example.com | Role: user
-Updated state: User: john_doe | Email: john@example.com | Role: admin`;
-    } else if (/\b(books?|library|read|shelf|bookshelf)\b/i.test(lowerPrompt)) {
-      classProperties = `  private title: string;
-  private author: string;
-  private isAvailable: boolean = true;`;
-      classConstructor = `  constructor(title: string, author: string) {
-    this.title = title;
-    this.author = author;
-  }`;
-      classMethod = `  public borrowBook(): boolean {
-    if (this.isAvailable) {
-      this.isAvailable = false;
-      return true;
-    }
-    return false;
-  }
-  public getStatus(): string {
-    return "'" + this.title + "' by " + this.author + " is " + (this.isAvailable ? 'Available' : 'Borrowed');
-  }`;
-      instantiation = `const book = new ${concept}("Clean Code", "Robert C. Martin");
-console.log(book.getStatus());
-book.borrowBook();
-console.log(book.getStatus());`;
-      runLogs = `'Clean Code' by Robert C. Martin is Available
-'Clean Code' by Robert C. Martin is Borrowed`;
-    }
-
-    const initial = `// 1. Defines a class representing '${concept}' based on custom request
-class ${concept} {
-${classProperties}
-
-${classConstructor}
-
-${classMethod}
 }
-${instantiation}`;
+const inst = new ${concept}("Sandbox Test");
+inst.runTask();`;
 
-    const healed = `// Healed attempt: Removed the problematic import and compiled directly
+    const healedTs = `// Healed attempt: Cleaned compiler environment import bindings
 class ${concept} {
-${classProperties}
-
-${classConstructor}
-
-${classMethod}
+  private name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+  public runTask(): void {
+    console.log("[${concept}] Custom request: '${cleanPrompt}'");
+  }
 }
-${instantiation}
+const inst = new ${concept}("Sandbox Test");
+inst.runTask();
 export {};`;
 
-    const error = `TSError: ⨯ Unable to compile TypeScript:
-sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.
-sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
+    const errorTs = `TSError: ⨯ Unable to compile TypeScript:
+sandbox_run.ts(1,35): error TS2307: Cannot find module './brokenFile' or its corresponding type declarations.`;
+    
+    const outputTs = `[${concept}] Custom request: '${cleanPrompt}'`;
+
+    // Python Dynamic Generation
+    const initialPy = `class ${concept}:
+    def __init__(self, name: str):
+        self.name = name
+    def run_task(self):
+        print(f"[${concept}] Custom request: '${cleanPrompt}'")
+
+inst = ${concept}("Sandbox Test")
+inst.run_task()`;
+
+    const healedPy = `# Healed attempt: Resolved incorrect import exception
+class ${concept}:
+    def __init__(self, name: str):
+        self.name = name
+    def run_task(self):
+        print(f"[${concept}] Custom request: '${cleanPrompt}'")
+
+inst = ${concept}("Sandbox Test")
+inst.run_task()`;
+
+    const errorPy = `Traceback (most recent call last):
+  File "sandbox_run.py", line 1, in <module>
+    import non_existent_helper_module
+ModuleNotFoundError: No module named 'non_existent_helper_module'`;
+
+    const outputPy = `[${concept}] Custom request: '${cleanPrompt}'`;
 
     return {
       title: promptText,
-      initial,
-      healed,
-      error,
-      output: runLogs
+      initial: initialTs,
+      healed: healedTs,
+      error: errorTs,
+      output: outputTs,
+      initialPy,
+      healedPy,
+      errorPy,
+      outputPy
     };
   };
 
@@ -3109,27 +3132,37 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
       return;
     }
 
+    const isTs = language === 'typescript';
+    const codeInitial = isTs ? data.initial : (data.initialPy || data.initial);
+    const codeHealed = isTs ? data.healed : (data.healedPy || data.healed);
+    const codeError = isTs ? data.error : (data.errorPy || data.error);
+    const codeOutput = isTs ? data.output : (data.outputPy || data.output);
+
     (async () => {
-      await log(`🤖 [1/3] Asking local AI model to write initial TypeScript code for '${data.title}'...`, 600);
+      await log(`🤖 [1/3] Prompting agent to draft the initial ${language.toUpperCase()} script for '${data.title}'...`, 600);
       setProgress(20);
 
-      await log(`✔ Initial code generated successfully!\n\n--- Generated Code ---\n${data.initial}\n----------------------`, 1000);
+      await log(`✔ Initial code generated successfully!\n\n--- Generated Code ---\n${codeInitial}\n----------------------`, 1000);
       setProgress(40);
 
-      await log(`🚀 [Attempt 1/4] Executing code in the Harness Sandbox...`, 800);
-      await log(`⚠️ [TEST SCENARIO] Injected a broken import line into Attempt 1 to demonstrate Self-Healing functionality!\n`, 600);
+      await log(`🚀 [Attempt 1/4] Executing in Harness Sandbox...`, 800);
+      if (isTs) {
+        await log(`⚠️ [TEST SCENARIO] Injected an invalid import to trigger Self-Healing for TypeScript!\n`, 600);
+      } else {
+        await log(`⚠️ [TEST SCENARIO] Injected an invalid import to trigger Self-Healing for Python!\n`, 600);
+      }
 
-      await log(`💥 [FAIL] Execution failed!\n--- Captured Error Logs ---\n${data.error}\n--------------------------`, 800);
+      await log(`💥 [FAIL] Sandbox run failed!\n--- Captured Errors (${isolation.toUpperCase()} mode) ---\n${codeError}\n--------------------------------------------`, 800);
       setProgress(60);
 
-      await log(`🔄 [SELF-HEALING] Feeding the broken code and error logs back to LLM for repair...`, 1200);
-      await log(`✔ LLM successfully analyzed the error logs and provided a healed version of the code!\n\n--- Healed Code ---\n${data.healed}\n-------------------`, 1000);
+      await log(`🔄 [SELF-HEALING] Feeding broken code and tracebacks back to agent for repair...`, 1200);
+      await log(`✔ Agent successfully healed and refactored the code!\n\n--- Healed Code ---\n${codeHealed}\n-------------------`, 1000);
       setProgress(80);
 
-      await log(`🚀 [Attempt 2/4] Executing healed code in the Harness Sandbox...`, 800);
+      await log(`🚀 [Attempt 2/4] Executing healed code in Harness Sandbox...`, 800);
 
-      await log(`🎉 [SUCCESS] The code compiled and ran without any errors!\n------------------ RUN OUTPUT ------------------\n${data.output}\n------------------------------------------------`, 800);
-      await log(`🏁 [CONCLUSION] Mission accomplished! The Harness successfully routed the errors, prompted the LLM, and validated bug-free code.`, 600);
+      await log(`🎉 [SUCCESS] The code executed cleanly under ${isolation.toUpperCase()} isolation!\n------------------ RUN OUTPUT ------------------\n${codeOutput}\n------------------------------------------------`, 800);
+      await log(`🏁 [CONCLUSION] Mission accomplished! The Harness successfully routed the errors, prompted the agent, and validated bug-free code.`, 600);
 
       setProgress(100);
       setStatus('success');
@@ -3187,7 +3220,7 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <Terminal size={20} style={{ color: 'var(--color-cyan)' }} className="animate-pulse" />
             <span style={{ fontSize: '1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-              <span>🦾 HARNESS AGENT SIMULATOR v1.0</span>
+              <span>🦾 HARNESS AGENT SIMULATOR v2.0</span>
               <span style={{
                 fontSize: '0.65rem',
                 padding: '0.15rem 0.4rem',
@@ -3227,6 +3260,103 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
           >
             <X size={18} />
           </button>
+        </div>
+
+        {/* v2.0 Dynamic Selectors Row */}
+        <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+          {/* Language Selector */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1, minWidth: '200px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>SELECT PROGRAMMING LANGUAGE:</div>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <button
+                disabled={isRunning}
+                onClick={() => { setLanguage('typescript'); resetSimulation(); }}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.8rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid',
+                  borderColor: language === 'typescript' ? 'var(--color-cyan)' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: language === 'typescript' ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                  color: language === 'typescript' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  fontWeight: language === 'typescript' ? 700 : 500
+                }}
+              >
+                TypeScript (TS)
+              </button>
+              <button
+                disabled={isRunning}
+                onClick={() => { setLanguage('python'); resetSimulation(); }}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.8rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid',
+                  borderColor: language === 'python' ? 'var(--color-cyan)' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: language === 'python' ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                  color: language === 'python' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  fontWeight: language === 'python' ? 700 : 500
+                }}
+              >
+                Python (PY)
+              </button>
+            </div>
+          </div>
+
+          {/* Isolation Selector */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1, minWidth: '200px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>EXECUTION ISOLATION LEVEL:</div>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <button
+                disabled={isRunning}
+                onClick={() => { setIsolation('local'); resetSimulation(); }}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.8rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid',
+                  borderColor: isolation === 'local' ? 'var(--color-cyan)' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: isolation === 'local' ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                  color: isolation === 'local' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  fontWeight: isolation === 'local' ? 700 : 500
+                }}
+              >
+                Local Process (Fast)
+              </button>
+              <button
+                disabled={isRunning}
+                onClick={() => { setIsolation('docker'); resetSimulation(); }}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.8rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-mono)',
+                  border: '1px solid',
+                  borderColor: isolation === 'docker' ? 'var(--color-cyan)' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: isolation === 'docker' ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                  color: isolation === 'docker' ? 'var(--color-cyan)' : 'var(--text-secondary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  fontWeight: isolation === 'docker' ? 700 : 500
+                }}
+              >
+                Docker Sandbox (Secure)
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Task Selection Row */}
@@ -3338,7 +3468,7 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
             <div style={{ color: 'rgba(255,255,255,0.4)', lineHeight: '1.6' }}>
               q-agent@harness-v2:~$ _ <span className="animate-pulse" style={{ color: 'var(--color-cyan)' }}>█</span>
               <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
-                {activeData ? `Selected: '${activeData.title}'. Click 'Run Self-Healing Agent' to start.` : "Select a coding task above or enter your custom task to begin."}
+                {activeData ? `Selected: '${activeData.title}' (${language.toUpperCase()} under ${isolation.toUpperCase()}). Click 'Run Self-Healing Agent' to start.` : "Select a coding task above or enter your custom task to begin."}
               </div>
             </div>
           )}
@@ -3353,7 +3483,7 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
               textColor = '#38bdf8';
             } else if (logLine.includes('🤖') || logLine.includes('🔄')) {
               textColor = '#c084fc';
-            } else if (logLine.includes('const ') || logLine.includes('function ') || logLine.includes('console.log') || logLine.includes('// ') || logLine.includes('class ')) {
+            } else if (logLine.includes('const ') || logLine.includes('function ') || logLine.includes('console.log') || logLine.includes('// ') || logLine.includes('class ') || logLine.includes('def ') || logLine.includes('print(')) {
               textColor = '#cbd5e1';
             }
 
@@ -3365,8 +3495,8 @@ sandbox_run.ts(1,35): import { nonExistentHelper } from './brokenFile';`;
                   color: textColor,
                   lineHeight: '1.6',
                   marginBottom: '0.8rem',
-                  borderLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') ? '2px solid rgba(6, 182, 212, 0.2)' : 'none',
-                  paddingLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') ? '0.6rem' : '0'
+                  borderLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') || logLine.includes('def ') ? '2px solid rgba(6, 182, 212, 0.2)' : 'none',
+                  paddingLeft: logLine.includes('function ') || logLine.includes('const ') || logLine.includes('class ') || logLine.includes('def ') ? '0.6rem' : '0'
                 }}
               >
                 {logLine}
